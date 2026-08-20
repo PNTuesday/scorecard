@@ -59,7 +59,6 @@ function nextHole() {
         currentHole++;
         render();
     }
-
 }
 
 function previousHole() {
@@ -68,7 +67,6 @@ function previousHole() {
         currentHole--;
         render();
     }
-
 }
 
 function render() {
@@ -168,4 +166,13 @@ function render() {
         `;
     });
 
-  
+    html += `
+            </div>
+
+        </div>
+    `;
+
+    document.getElementById("root").innerHTML = html;
+}
+
+render();
