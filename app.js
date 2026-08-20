@@ -120,9 +120,9 @@ function render() {
 
         html += `
                 <button
-                    class="score-btn reset"
-                    onclick="setScore('${player.name}', null)">
-                    ↺
+                    class="score-btn zero"
+                    onclick="setScore('${player.name}', 0)">
+                    0
                 </button>
             </div>
         </div>
