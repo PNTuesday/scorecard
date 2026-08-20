@@ -75,6 +75,11 @@ body {
     color: #991b1b;
     font-weight: bold;
 }
+
+.score-btn.zero:hover {
+    background: #fca5a5;
+}
+
 .nav-buttons {
     margin: 15px 0;
     display: flex;
