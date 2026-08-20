@@ -70,11 +70,11 @@ body {
     color: white;
 }
 
-.score-btn.reset {
+.score-btn.zero {
     background: #fecaca;
     color: #991b1b;
+    font-weight: bold;
 }
-
 .nav-buttons {
     margin: 15px 0;
     display: flex;
