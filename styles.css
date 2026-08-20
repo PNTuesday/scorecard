@@ -3,7 +3,7 @@ body {
     background: #064e3b;
     color: #111827;
     margin: 0;
-    padding: 15px;
+    padding: 10px;
 }
 
 .container {
@@ -13,62 +13,68 @@ body {
 
 .header {
     background: white;
-    padding: 20px;
-    border-radius: 20px;
-    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 16px;
+    margin-bottom: 10px;
 }
 
 .header h1 {
     margin: 0;
+    font-size: 1.4rem;
+}
+
+.header p,
+.header h2 {
+    margin: 6px 0;
 }
 
 .nav-buttons {
     display: flex;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .nav-buttons button {
     flex: 1;
-    padding: 12px;
+    padding: 10px;
     border: none;
-    border-radius: 12px;
-    cursor: pointer;
+    border-radius: 10px;
     font-weight: bold;
+    cursor: pointer;
 }
 
 .score-card {
     background: white;
-    border-radius: 20px;
-    padding: 12px;
-    margin-bottom: 10px;
+    border-radius: 16px;
+    padding: 8px;
+    margin-bottom: 8px;
 }
 
 .player-name {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: bold;
 }
 
 .player-details {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #6b7280;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .score-selector {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .arrow-btn {
-    width: 70px;
-    height: 70px;
+    width: 55px;
+    height: 55px;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     background: #d1d5db;
-    font-size: 28px;
+    font-size: 22px;
     font-weight: bold;
     cursor: pointer;
 }
@@ -78,13 +84,13 @@ body {
 }
 
 .score-display {
-    width: 90px;
-    height: 70px;
-    border-radius: 12px;
+    width: 70px;
+    height: 55px;
+    border-radius: 10px;
     display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 36px;
+    align-items: center;
+    font-size: 28px;
     font-weight: bold;
 }
 
@@ -100,15 +106,15 @@ body {
 
 .totals {
     background: white;
-    border-radius: 20px;
-    padding: 15px;
-    margin-top: 15px;
+    border-radius: 16px;
+    padding: 12px;
+    margin-top: 10px;
 }
 
 .total-player {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .total-player:last-child {
