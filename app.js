@@ -1,28 +1,28 @@
 const players = [
-  {
-    name: "Bob Smith",
-    tee: "Gold",
-    index: 10.2,
-    hcp: 12
-  },
-  {
-    name: "Mike Jones",
-    tee: "White",
-    index: 14.8,
-    hcp: 16
-  },
-  {
-    name: "Tom Wilson",
-    tee: "Gold",
-    index: 8.5,
-    hcp: 10
-  },
-  {
-    name: "Jim Brown",
-    tee: "White",
-    index: 18.1,
-    hcp: 20
-  }
+    {
+        name: "Bob Smith",
+        tee: "Gold",
+        index: 10.2,
+        hcp: 12
+    },
+    {
+        name: "Mike Jones",
+        tee: "White",
+        index: 14.8,
+        hcp: 16
+    },
+    {
+        name: "Tom Wilson",
+        tee: "Gold",
+        index: 8.5,
+        hcp: 10
+    },
+    {
+        name: "Jim Brown",
+        tee: "White",
+        index: 18.1,
+        hcp: 20
+    }
 ];
 
 let currentHole = 1;
@@ -43,6 +43,20 @@ function setScore(playerName, score) {
     render();
 }
 
+function nextHole() {
+    if (currentHole < 18) {
+        currentHole++;
+        render();
+    }
+}
+
+function previousHole() {
+    if (currentHole > 1) {
+        currentHole--;
+        render();
+    }
+}
+
 function render() {
 
     let html = `
@@ -50,18 +64,25 @@ function render() {
 
         <div class="header">
             <h1>Group A Scorecard</h1>
-            <p>Entry ID: X82K7P</p>
+            <p><strong>Entry ID:</strong> X82K7P</p>
             <h2>Hole ${currentHole}</h2>
 
-            <button onclick="previousHole()">Previous</button>
-            <button onclick="nextHole()">Next</button>
+            <div class="nav-buttons">
+                <button onclick="previousHole()">
+                    Previous
+                </button>
+
+                <button onclick="nextHole()">
+                    Next
+                </button>
+            </div>
         </div>
     `;
 
     players.forEach(player => {
 
         const currentScore =
-          scores[player.name][currentHole - 1];
+            scores[player.name][currentHole - 1];
 
         html += `
         <div class="score-card">
@@ -78,14 +99,10 @@ function render() {
                 </div>
             </div>
 
-            <div class="current-score">
-                ${currentScore ?? "-"}
-            </div>
-
             <div class="score-grid">
         `;
 
-        for(let n = 1; n <= 8; n++) {
+        for (let n = 1; n <= 8; n++) {
 
             const selected =
                 currentScore === n
@@ -94,20 +111,19 @@ function render() {
 
             html += `
                 <button
-                  class="score-btn ${selected}"
-                  onclick="setScore('${player.name}', ${n})">
-                  ${n}
+                    class="score-btn ${selected}"
+                    onclick="setScore('${player.name}', ${n})">
+                    ${n}
                 </button>
             `;
         }
 
         html += `
-            <button
-              class="score-btn reset"
-              onclick="setScore('${player.name}', null)">
-              ↺
-            </button>
-
+                <button
+                    class="score-btn reset"
+                    onclick="setScore('${player.name}', null)">
+                    ↺
+                </button>
             </div>
         </div>
         `;
@@ -119,6 +135,7 @@ function render() {
     `;
 
     players.forEach(player => {
+
         html += `
             <div class="total-player">
                 <span>${player.name}</span>
@@ -133,20 +150,6 @@ function render() {
     `;
 
     document.getElementById("root").innerHTML = html;
-}
-
-function nextHole() {
-    if (currentHole < 18) {
-        currentHole++;
-        render();
-    }
-}
-
-function previousHole() {
-    if (currentHole > 1) {
-        currentHole--;
-        render();
-    }
 }
 
 render();
