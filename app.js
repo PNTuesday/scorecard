@@ -30,25 +30,26 @@ let currentHole = 1;
 const scores = {};
 
 players.forEach(player => {
-    scores[player.name] = Array(18).fill(4);
+    scores[player.name] = Array(18).fill(null);
 });
 
 function total(playerName) {
     return scores[playerName]
-        .reduce((sum, value) => sum + value, 0);
+        .reduce((sum, value) => sum + (value ?? 0), 0);
 }
 
 function changeScore(playerName, delta) {
 
     let currentValue =
-        scores[playerName][currentHole - 1];
+        scores[playerName][currentHole - 1] ?? 4;
 
     let newValue = currentValue + delta;
 
     if (newValue < 0) newValue = 0;
     if (newValue > 8) newValue = 8;
 
-    scores[playerName][currentHole - 1] = newValue;
+    scores[playerName][currentHole - 1] =
+        newValue;
 
     render();
 }
@@ -103,7 +104,7 @@ function render() {
     players.forEach(player => {
 
         const score =
-            scores[player.name][currentHole - 1];
+            scores[player.name][currentHole - 1] ?? 4;
 
         const scoreClass =
             score === 0
