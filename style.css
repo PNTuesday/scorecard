@@ -1,0 +1,93 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #064e3b;
+    color: #111827;
+    margin: 0;
+    padding: 15px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.header {
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+}
+
+.header h1 {
+    margin: 0;
+}
+
+.score-card {
+    background: white;
+    border-radius: 20px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.player-header {
+    margin-bottom: 10px;
+}
+
+.player-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.player-details {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.current-score {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    background: #f3f4f6;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+.score-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.score-btn {
+    min-height: 55px;
+    border: none;
+    border-radius: 12px;
+    background: #d1d5db;
+    color: #111827;
+    font-weight: bold;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.score-btn.selected {
+    background: #065f46;
+    color: white;
+}
+
+.score-btn.reset {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.totals {
+    background: white;
+    border-radius: 20px;
+    padding: 15px;
+}
+
+.total-player {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
