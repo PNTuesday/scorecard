@@ -30,7 +30,7 @@ body {
 }
 
 .player-header {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .player-name {
@@ -41,16 +41,6 @@ body {
 .player-details {
     color: #6b7280;
     font-size: 0.9rem;
-}
-
-.current-score {
-    font-size: 2rem;
-    font-weight: bold;
-    text-align: center;
-    background: #f3f4f6;
-    padding: 10px;
-    border-radius: 12px;
-    margin-bottom: 10px;
 }
 
 .score-grid {
@@ -68,6 +58,11 @@ body {
     font-weight: bold;
     font-size: 20px;
     cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.score-btn:hover {
+    opacity: 0.9;
 }
 
 .score-btn.selected {
@@ -80,6 +75,20 @@ body {
     color: #991b1b;
 }
 
+.nav-buttons {
+    margin: 15px 0;
+    display: flex;
+    gap: 10px;
+}
+
+.nav-buttons button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
 .totals {
     background: white;
     border-radius: 20px;
@@ -90,4 +99,8 @@ body {
     display: flex;
     justify-content: space-between;
     margin-bottom: 8px;
+}
+
+.total-player:last-child {
+    margin-bottom: 0;
 }
