@@ -120,7 +120,7 @@ function render() {
 
                 <p>
                     <strong>Entry ID:</strong>
-                    ${playersData.entryid}
+                    ${playersData.roundid}
                 </p>
 
                 <div class="hole-info">
