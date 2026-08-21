@@ -1,26 +1,31 @@
-[
-  {
-    "name": "Bob Smith",
-    "tee": "Gold",
-    "index": 10.2,
-    "hcp": 12
-  },
-  {
-    "name": "Mike Jones",
-    "tee": "White",
-    "index": 14.8,
-    "hcp": 16
-  },
-  {
-    "name": "Tom Wilson",
-    "tee": "Gold",
-    "index": 8.5,
-    "hcp": 10
-  },
-  {
-    "name": "Jim Brown",
-    "tee": "White",
-    "index": 18.1,
-    "hcp": 20
-  }
-]
+{
+  "entryid": "X82K7P",
+  "group": "A",
+
+  "players": [
+    {
+      "name": "Bob Smith",
+      "tee": "White",
+      "index": 10.2,
+      "hcp": 12
+    },
+    {
+      "name": "Mike Jones",
+      "tee": "Bhy",
+      "index": 14.8,
+      "hcp": 16
+    },
+    {
+      "name": "Tom Wilson",
+      "tee": "Why",
+      "index": 8.5,
+      "hcp": 10
+    },
+    {
+      "name": "Jim Brown",
+      "tee": "Green",
+      "index": 18.1,
+      "hcp": 20
+    }
+  ]
+}
