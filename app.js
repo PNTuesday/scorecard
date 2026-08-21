@@ -54,7 +54,8 @@ function changeScore(playerName, delta) {
     if (newValue < 0) newValue = 0;
     if (newValue > 8) newValue = 8;
 
-    scores[playerName][currentHole - 1] = newValue;
+    scores[playerName][currentHole - 1] =
+        newValue;
 
     render();
 }
@@ -89,7 +90,7 @@ function render() {
                     X82K7P
                 </p>
 
-                <div style="text-align:right;font-weight:bold;">
+                <div class="hole-info">
                     Hole ${currentHole} | Par 4 | HCP ?
                 </div>
 
