@@ -1,140 +1,160 @@
-const players = [
-    {
-        name: "Bob Smith",
-        tee: "Gold",
-        index: 10.2,
-        hcp: 12
-    },
-    {
-        name: "Mike Jones",
-        tee: "White",
-        index: 14.8,
-        hcp: 16
-    },
-    {
-        name: "Tom Wilson",
-        tee: "Gold",
-        index: 8.5,
-        hcp: 10
-    },
-    {
-        name: "Jim Brown",
-        tee: "White",
-        index: 18.1,
-        hcp: 20
-    }
-];
-
-let course = null;
-
+let courseData = null;
+let playersData = null;
+let players = [];
 let currentHole = 1;
 
 const scores = {};
 
-players.forEach(player => {
-    scores[player.name] = Array(18).fill(4);
-});
+async function loadData() {
+    try {
+        const [courseResponse, playersResponse] = await Promise.all([
+            fetch("course.json"),
+            fetch("players.json")
+        ]);
 
-function total(playerName) {
+        if (!courseResponse.ok) {
+            throw new Error("Unable to load course.json");
+        }
 
-    let total = 0;
+        if (!playersResponse.ok) {
+            throw new Error("Unable to load players.json");
+        }
 
-    for (let i = 0; i < currentHole; i++) {
-        total += scores[playerName][i];
+        courseData = await courseResponse.json();
+        playersData = await playersResponse.json();
+        players = playersData.players;
+
+        initializeScores();
+        render();
+    } catch (error) {
+        document.getElementById("root").innerHTML = `
+            <div class="container">
+                <div class="header">
+                    <h1>Unable to load scorecard</h1>
+                    <p>${error.message}</p>
+                </div>
+            </div>
+        `;
+
+        console.error(error);
     }
-
-    return total;
 }
 
-function changeScore(playerName, delta) {
+function initializeScores() {
+    players.forEach(player => {
+        scores[player.name] = courseData.holes.map(hole => hole.par);
+    });
+}
 
-    let currentValue =
-        scores[playerName][currentHole - 1];
+function total(playerName) {
+    let playerTotal = 0;
+
+    for (let i = 0; i < currentHole; i++) {
+        playerTotal += scores[playerName][i];
+    }
+
+    return playerTotal;
+}
+
+function changeScore(playerIndex, delta) {
+    const player = players[playerIndex];
+    const currentValue = scores[player.name][currentHole - 1];
 
     let newValue = currentValue + delta;
 
-    if (newValue < 0) newValue = 0;
-    if (newValue > 8) newValue = 8;
+    if (newValue < 0) {
+        newValue = 0;
+    }
 
-    scores[playerName][currentHole - 1] =
-        newValue;
+    if (newValue > 8) {
+        newValue = 8;
+    }
 
+    scores[player.name][currentHole - 1] = newValue;
     render();
 }
 
 function nextHole() {
-
-    if (currentHole < 18) {
+    if (currentHole < courseData.holes.length) {
         currentHole++;
         render();
+        window.scrollTo(0, 0);
     }
 }
 
 function previousHole() {
-
     if (currentHole > 1) {
         currentHole--;
         render();
+        window.scrollTo(0, 0);
     }
 }
 
+function formatDate(dateValue) {
+    if (!dateValue) {
+        return "";
+    }
+
+    const date = new Date(`${dateValue}T00:00:00`);
+
+    if (Number.isNaN(date.getTime())) {
+        return dateValue;
+    }
+
+    return date.toLocaleDateString();
+}
+
 function render() {
-    const holeData =
-        course.holes[currentHole - 1];
+    const holeData = courseData.holes[currentHole - 1];
+    const formattedDate = formatDate(playersData.date);
 
-    const holePar =
-        holeData.par;
-
-    const holeHcp =
-        holeData.hcp;
-    
     let html = `
         <div class="container">
-
             <div class="header">
+                <h1>Group ${playersData.group} Scorecard</h1>
 
-                <h1>Group A Scorecard</h1>
+                <p>
+                    <strong>${playersData.course}</strong>
+                    ${formattedDate ? ` | ${formattedDate}` : ""}
+                </p>
 
                 <p>
                     <strong>Entry ID:</strong>
-                    X82K7P
+                    ${playersData.entryid}
                 </p>
 
                 <div class="hole-info">
-                
-                    Hole ${currentHole} | Par ${holePar} | HCP ${holeHcp}
-                
+                    Hole ${holeData.hole} |
+                    Par ${holeData.par} |
+                    HCP ${holeData.hcp}
                 </div>
 
-
                 <div class="nav-buttons">
-
-                    <button onclick="previousHole()">
+                    <button
+                        onclick="previousHole()"
+                        ${currentHole === 1 ? "disabled" : ""}>
                         Previous Hole
                     </button>
 
-                    <button onclick="nextHole()">
+                    <button
+                        onclick="nextHole()"
+                        ${currentHole === courseData.holes.length
+                            ? "disabled"
+                            : ""}>
                         Next Hole
                     </button>
-
                 </div>
-
             </div>
     `;
 
-    players.forEach(player => {
-
-        const score =
-            scores[player.name][currentHole - 1];
+    players.forEach((player, playerIndex) => {
+        const score = scores[player.name][currentHole - 1];
 
         const scoreClass =
-            score === 0
-                ? "score-zero"
-                : "score-normal";
+            score === 0 ? "score-zero" : "score-normal";
 
         html += `
             <div class="score-card">
-
                 <div class="player-name">
                     ${player.name}
                 </div>
@@ -146,10 +166,9 @@ function render() {
                 </div>
 
                 <div class="score-selector">
-
                     <button
                         class="arrow-btn"
-                        onclick="changeScore('${player.name}', -1)">
+                        onclick="changeScore(${playerIndex}, -1)">
                         ◀
                     </button>
 
@@ -159,47 +178,34 @@ function render() {
 
                     <button
                         class="arrow-btn"
-                        onclick="changeScore('${player.name}', 1)">
+                        onclick="changeScore(${playerIndex}, 1)">
                         ▶
                     </button>
-
                 </div>
-
             </div>
         `;
     });
 
     html += `
             <div class="totals">
-
                 <h2>Through Hole ${currentHole}</h2>
     `;
 
     players.forEach(player => {
-
         html += `
                 <div class="total-player">
-
                     <span>${player.name}</span>
-
                     <strong>${total(player.name)}</strong>
-
                 </div>
         `;
     });
 
     html += `
             </div>
-
         </div>
     `;
 
     document.getElementById("root").innerHTML = html;
 }
 
-fetch('course.json')
-    .then(response => response.json())
-    .then(data => {
-        course = data;
-        render();
-    });
+loadData();
