@@ -90,7 +90,11 @@ function render() {
                     X82K7P
                 </p>
 
-                <h2>Hole ${currentHole}</h2>
+                <div class="hole-info">
+                
+                    Hole ${currentHole} | Par ${holePar} | HCP ${holeHcp}
+                
+                </div>
 
                 <div class="nav-buttons">
 
