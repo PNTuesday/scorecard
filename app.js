@@ -25,6 +25,8 @@ const players = [
     }
 ];
 
+let course = null;
+
 let currentHole = 1;
 
 const scores = {};
@@ -77,7 +79,15 @@ function previousHole() {
 }
 
 function render() {
+    const holeData =
+        course.holes[currentHole - 1];
 
+    const holePar =
+        holeData.par;
+
+    const holeHcp =
+        holeData.hcp;
+    
     let html = `
         <div class="container">
 
@@ -91,8 +101,11 @@ function render() {
                 </p>
 
                 <div class="hole-info">
-                    Hole ${currentHole} | Par 4 | HCP ?
+                
+                    Hole ${currentHole} | Par ${holePar} | HCP ${holeHcp}
+                
                 </div>
+
 
                 <div class="nav-buttons">
 
@@ -184,4 +197,9 @@ function render() {
     document.getElementById("root").innerHTML = html;
 }
 
-render();
+fetch('course.json')
+    .then(response => response.json())
+    .then(data => {
+        course = data;
+        render();
+    });
