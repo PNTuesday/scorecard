@@ -30,18 +30,24 @@ let currentHole = 1;
 const scores = {};
 
 players.forEach(player => {
-    scores[player.name] = Array(18).fill(null);
+    scores[player.name] = Array(18).fill(4);
 });
 
 function total(playerName) {
-    return scores[playerName]
-        .reduce((sum, value) => sum + (value ?? 0), 0);
+
+    let total = 0;
+
+    for (let i = 0; i < currentHole; i++) {
+        total += scores[playerName][i];
+    }
+
+    return total;
 }
 
 function changeScore(playerName, delta) {
 
     let currentValue =
-        scores[playerName][currentHole - 1] ?? 4;
+        scores[playerName][currentHole - 1];
 
     let newValue = currentValue + delta;
 
@@ -104,7 +110,7 @@ function render() {
     players.forEach(player => {
 
         const score =
-            scores[player.name][currentHole - 1] ?? 4;
+            scores[player.name][currentHole - 1];
 
         const scoreClass =
             score === 0
@@ -151,7 +157,7 @@ function render() {
     html += `
             <div class="totals">
 
-                <h2>Running Totals</h2>
+                <h2>Through Hole ${currentHole}</h2>
     `;
 
     players.forEach(player => {
