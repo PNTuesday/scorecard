@@ -1,6 +1,9 @@
 {
   "courseName": "The Course",
 
+  "frontpar": 36,
+  "backpar": 36,
+
   "holes": [
     { "hole": 1, "par": 4, "hcp": 9 },
     { "hole": 2, "par": 4, "hcp": 13 },
