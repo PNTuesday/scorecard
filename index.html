@@ -13,13 +13,15 @@
 
     <div id="root"></div>
 
-    <!-- EmailJS -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/t/email.min.jsscript>
+    <!-- EmailJS Library -->
+    https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js    </script>
 
     <script>
-        emailjs.init({
-            publicKey: "yqaDJUJ7DH7hqe9ND"
-        });
+        (function () {
+            emailjs.init({
+                publicKey: "yqaDJUJ7DH7hqe9ND"
+            });
+        })();
     </script>
 
     <script src="app.js"></script>
