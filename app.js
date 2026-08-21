@@ -119,7 +119,7 @@ function render() {
                 </p>
 
                 <p>
-                    <strong>RoundID:</strong>
+                    <strong>Round ID:</strong>
                     ${playersData.roundid}
                 </p>
 
