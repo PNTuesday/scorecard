@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "T2BBMC",
+  "group": "F",
+  "date": "2026-08-25",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0036",
+      "displayname": "Jack L.",
+      "hcp": 4,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0037",
+      "displayname": "Stephen M.",
+      "hcp": 10,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0066",
+      "displayname": "Kevin W.",
+      "hcp": 13,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0014",
+      "displayname": "Brian C.",
+      "hcp": 20,
+      "tee": "Why"
+    }
+  ]
+}

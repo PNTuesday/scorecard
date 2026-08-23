@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "T292T7",
+  "group": "E",
+  "date": "2026-08-25",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0045",
+      "displayname": "Daniel M.",
+      "hcp": 6,
+      "tee": "White"
+    },
+    {
+      "playerid": "P0050",
+      "displayname": "Scott P.",
+      "hcp": 10,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0009",
+      "displayname": "Bob B.",
+      "hcp": 10,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0024",
+      "displayname": "Jack H.",
+      "hcp": 22,
+      "tee": "Green"
+    }
+  ]
+}

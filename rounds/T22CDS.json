@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "T22CDS",
+  "group": "B",
+  "date": "2026-08-25",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0049",
+      "displayname": "John P.",
+      "hcp": 6,
+      "tee": "White"
+    },
+    {
+      "playerid": "P0054",
+      "displayname": "Robert R.",
+      "hcp": 9,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0042",
+      "displayname": "Ted M.",
+      "hcp": 16,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0018",
+      "displayname": "Warren D.",
+      "hcp": 14,
+      "tee": "Green"
+    }
+  ]
+}
