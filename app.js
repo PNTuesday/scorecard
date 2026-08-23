@@ -2,7 +2,7 @@ const emailServiceId = "service_tu81pmn";
 const emailTemplateId = "template_sturumn";
 
 let courseData;
-let playersData;
+let roundData;
 let players = [];
 let currentHole = 1;
 let verified = false;
@@ -14,29 +14,52 @@ const scores = {};
 
 async function loadData() {
     try {
-        const [courseResponse, playersResponse] = await Promise.all([
-            fetch("course.json"),
-            fetch("players.json")
-        ]);
+        const roundId = getRoundIdFromUrl();
 
-        if (!courseResponse.ok) {
+        if (!roundId) {
             throw new Error(
-                `Unable to load course.json (${courseResponse.status})`
+                "The scorecard link is missing its RoundID."
             );
         }
 
-        if (!playersResponse.ok) {
+        const [courseResponse, roundResponse] =
+            await Promise.all([
+                fetch("course.json"),
+                fetch(
+                    `rounds/${encodeURIComponent(roundId)}.json`
+                )
+            ]);
+
+        if (!courseResponse.ok) {
             throw new Error(
-                `Unable to load players.json (${playersResponse.status})`
+                `Unable to load course.json ` +
+                `(${courseResponse.status}).`
+            );
+        }
+
+        if (!roundResponse.ok) {
+            throw new Error(
+                `Unable to load round ${roundId} ` +
+                `(${roundResponse.status}).`
             );
         }
 
         courseData = await courseResponse.json();
-        playersData = await playersResponse.json();
-        players = playersData.players;
+        roundData = await roundResponse.json();
+        players = roundData.players;
+
+        if (
+            String(roundData.roundid).toUpperCase() !==
+            roundId.toUpperCase()
+        ) {
+            throw new Error(
+                "The requested RoundID does not match the round file."
+            );
+        }
 
         initializeScores();
         render();
+
     } catch (error) {
         console.error(error);
 
@@ -44,25 +67,45 @@ async function loadData() {
             <div class="container">
                 <div class="header">
                     <h1>Unable to load scorecard</h1>
-                    <p>${error.message}</p>
+                    <p>${escapeHtml(error.message)}</p>
                 </div>
             </div>
         `;
     }
 }
 
+function getRoundIdFromUrl() {
+    const value = new URLSearchParams(
+        window.location.search
+    ).get("round");
+
+    if (!value) {
+        return "";
+    }
+
+    const roundId = value.trim();
+
+    if (!/^[A-Za-z0-9_-]+$/.test(roundId)) {
+        throw new Error(
+            "The RoundID in the scorecard link is invalid."
+        );
+    }
+
+    return roundId;
+}
+
 function initializeScores() {
     players.forEach(player => {
-        scores[player.name] =
+        scores[player.playerid] =
             courseData.holes.map(hole => hole.par);
     });
 }
 
-function total(playerName) {
+function total(playerId) {
     let playerTotal = 0;
 
     for (let i = 0; i < currentHole; i++) {
-        playerTotal += scores[playerName][i];
+        playerTotal += scores[playerId][i];
     }
 
     return playerTotal;
@@ -74,15 +117,17 @@ function changeScore(playerIndex, delta) {
     }
 
     const player = players[playerIndex];
+
     const currentValue =
-        scores[player.name][currentHole - 1];
+        scores[player.playerid][currentHole - 1];
 
     const newValue = Math.min(
         8,
         Math.max(0, currentValue + delta)
     );
 
-    scores[player.name][currentHole - 1] = newValue;
+    scores[player.playerid][currentHole - 1] =
+        newValue;
 
     verified = false;
     submissionMessage = "";
@@ -134,12 +179,16 @@ function formatDate(dateValue) {
 function buildScoreData() {
     return players.map(player => {
         const playerScores = {
-            player: player.name
+            playerid: player.playerid,
+            displayname: player.displayname
         };
 
-        scores[player.name].forEach((score, index) => {
-            playerScores[`H${index + 1}`] = score;
-        });
+        scores[player.playerid].forEach(
+            (score, index) => {
+                playerScores[`H${index + 1}`] =
+                    score;
+            }
+        );
 
         return playerScores;
     });
@@ -155,18 +204,24 @@ async function submitScores() {
 
     render();
 
-    const scoreData = buildScoreData();
-    const verifiedTimestamp = new Date().toISOString();
-
     const templateParameters = {
-        roundid: String(playersData.roundid),
-        group: String(playersData.group),
-        date: String(playersData.date),
-        course: String(playersData.course),
+        roundid: String(roundData.roundid),
+        group: String(roundData.group),
+        date: String(roundData.date),
+        course: String(
+            roundData.course ||
+            courseData.coursename ||
+            ""
+        ),
         verified: "true",
-        verifiedtimestamp: verifiedTimestamp,
+        verifiedtimestamp:
+            new Date().toISOString(),
         playercount: String(players.length),
-        scores: JSON.stringify(scoreData, null, 2)
+        scores: JSON.stringify(
+            buildScoreData(),
+            null,
+            2
+        )
     };
 
     try {
@@ -180,7 +235,8 @@ async function submitScores() {
 
         submissionMessage =
             `Scores submitted successfully. ` +
-            `Round ID: ${playersData.roundid}`;
+            `Round ID: ${roundData.roundid}`;
+
     } catch (error) {
         console.error(
             "EmailJS submission failed:",
@@ -188,7 +244,9 @@ async function submitScores() {
         );
 
         submissionMessage =
-            "Submission failed. Check the connection and try again.";
+            "Submission failed. " +
+            "Check the connection and try again.";
+
     } finally {
         submitting = false;
         render();
@@ -200,26 +258,40 @@ function render() {
         courseData.holes[currentHole - 1];
 
     const formattedDate =
-        formatDate(playersData.date);
+        formatDate(roundData.date);
+
+    const courseName =
+        roundData.course ||
+        courseData.coursename ||
+        "";
 
     let html = `
         <div class="container">
 
             <div class="header">
+
                 <h1>
-                    Group ${playersData.group} Scorecard
+                    Group ${escapeHtml(roundData.group)}
+                    Scorecard
                 </h1>
 
                 <p>
-                    <strong>${playersData.course}</strong>
-                    ${formattedDate
-                        ? ` | ${formattedDate}`
-                        : ""}
+                    <strong>
+                        ${escapeHtml(courseName)}
+                    </strong>
+
+                    ${
+                        formattedDate
+                            ? ` | ${escapeHtml(
+                                formattedDate
+                            )}`
+                            : ""
+                    }
                 </p>
 
                 <p>
                     <strong>Round ID:</strong>
-                    ${playersData.roundid}
+                    ${escapeHtml(roundData.roundid)}
                 </p>
 
                 <div class="hole-info">
@@ -229,12 +301,14 @@ function render() {
                 </div>
 
                 <div class="nav-buttons">
+
                     <button
                         onclick="previousHole()"
-                        ${currentHole === 1
-                            ? "disabled"
-                            : ""}
-                    >
+                        ${
+                            currentHole === 1
+                                ? "disabled"
+                                : ""
+                        }>
                         Previous Hole
                     </button>
 
@@ -245,95 +319,130 @@ function render() {
                             courseData.holes.length
                                 ? "disabled"
                                 : ""
-                        }
-                    >
+                        }>
                         Next Hole
                     </button>
+
                 </div>
             </div>
     `;
 
-    players.forEach((player, playerIndex) => {
-        const score =
-            scores[player.name][currentHole - 1];
+    players.forEach(
+        (player, playerIndex) => {
 
-        const scoreClass =
-            score === 0
-                ? "score-zero"
-                : "score-normal";
+            const score =
+                scores[player.playerid][
+                    currentHole - 1
+                ];
 
-        html += `
-            <div class="score-card">
+            const scoreClass =
+                score === 0
+                    ? "score-zero"
+                    : "score-normal";
 
-                <div class="player-name">
-                    ${player.name}
-                </div>
+            html += `
+                <div class="score-card">
 
-                <div class="player-details">
-                    ${player.tee} Tee |
-                    Index ${player.index} |
-                    HCP ${player.hcp}
-                </div>
-
-                <div class="score-selector">
-
-                    <button
-                        class="arrow-btn"
-                        onclick="changeScore(${playerIndex}, -1)"
-                        ${submitted ? "disabled" : ""}
-                    >
-                        ◀
-                    </button>
-
-                    <div class="score-display ${scoreClass}">
-                        ${score}
+                    <div class="player-name">
+                        ${escapeHtml(
+                            player.displayname
+                        )}
                     </div>
 
-                    <button
-                        class="arrow-btn"
-                        onclick="changeScore(${playerIndex}, 1)"
-                        ${submitted ? "disabled" : ""}
-                    >
-                        ▶
-                    </button>
+                    <div class="player-details">
+                        ${escapeHtml(player.tee)}
+                        Tee |
+                        HCP ${escapeHtml(player.hcp)}
+                    </div>
 
+                    <div class="score-selector">
+
+                        <button
+                            class="arrow-btn"
+                            onclick="
+                                changeScore(
+                                    ${playerIndex},
+                                    -1
+                                )
+                            "
+                            ${
+                                submitted
+                                    ? "disabled"
+                                    : ""
+                            }>
+                            ◀
+                        </button>
+
+                        <div
+                            class="
+                                score-display
+                                ${scoreClass}
+                            ">
+                            ${score}
+                        </div>
+
+                        <button
+                            class="arrow-btn"
+                            onclick="
+                                changeScore(
+                                    ${playerIndex},
+                                    1
+                                )
+                            "
+                            ${
+                                submitted
+                                    ? "disabled"
+                                    : ""
+                            }>
+                            ▶
+                        </button>
+
+                    </div>
                 </div>
-            </div>
-        `;
-    });
+            `;
+        }
+    );
 
     html += `
-            <div class="totals">
-                <h2>Through Hole ${currentHole}</h2>
+        <div class="totals">
+            <h2>Through Hole ${currentHole}</h2>
     `;
 
     players.forEach(player => {
         html += `
-                <div class="total-player">
-                    <span>${player.name}</span>
-                    <strong>${total(player.name)}</strong>
-                </div>
+            <div class="total-player">
+                <span>
+                    ${escapeHtml(
+                        player.displayname
+                    )}
+                </span>
+
+                <strong>
+                    ${total(player.playerid)}
+                </strong>
+            </div>
         `;
     });
 
     html += `
-            </div>
+        </div>
 
-            <div class="score-card">
+        <div class="score-card">
     `;
 
     if (!submitted) {
         html += `
-                <label>
-                    <input
-                        type="checkbox"
-                        onchange="setVerified(this.checked)"
-                        ${verified ? "checked" : ""}
-                    >
+            <label>
+                <input
+                    type="checkbox"
+                    onchange="
+                        setVerified(this.checked)
+                    "
+                    ${verified ? "checked" : ""}>
 
-                    I have verified these scores against
-                    the paper scorecard.
-                </label>
+                I have verified these scores
+                against the paper scorecard.
+            </label>
         `;
 
         if (verified) {
@@ -351,39 +460,52 @@ function render() {
                         color: white;
                         font-size: 1rem;
                         font-weight: bold;
-                    "
-                >
+                    ">
+
                     ${
                         submitting
                             ? "Submitting..."
                             : "Submit Verified Scores"
                     }
+
                 </button>
             `;
         }
     }
 
     if (submissionMessage) {
-        const messageColor =
-            submitted ? "#065f46" : "#991b1b";
-
         html += `
-                <p style="
-                    margin-top: 12px;
-                    font-weight: bold;
-                    color: ${messageColor};
-                ">
-                    ${submissionMessage}
-                </p>
+            <p style="
+                margin-top: 12px;
+                font-weight: bold;
+                color:
+                    ${
+                        submitted
+                            ? "#065f46"
+                            : "#991b1b"
+                    };
+            ">
+                ${escapeHtml(submissionMessage)}
+            </p>
         `;
     }
 
     html += `
-            </div>
+        </div>
         </div>
     `;
 
-    document.getElementById("root").innerHTML = html;
+    document.getElementById("root").innerHTML =
+        html;
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 loadData();
