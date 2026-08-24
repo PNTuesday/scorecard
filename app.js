@@ -200,20 +200,46 @@ function buildScoreSummary() {
 
         const holeScores = scores[player.playerid];
 
-        const total =
-            holeScores.reduce(
-                (sum, value) => sum + value,
-                0
-            );
+        const out =
+            holeScores
+                .slice(0, 9)
+                .reduce((sum, val) => sum + val, 0);
+
+        const inn =
+            holeScores
+                .slice(9, 18)
+                .reduce((sum, val) => sum + val, 0);
+
+        const total = out + inn;
+
+        const id =
+            player.playerid.padEnd(6);
+
+        const name =
+            player.displayname.padEnd(12);
+
+        const front =
+            holeScores
+                .slice(0, 9)
+                .map(score => String(score))
+                .join(" ");
+
+        const back =
+            holeScores
+                .slice(9, 18)
+                .map(score => String(score))
+                .join(" ");
 
         return (
-            `${player.playerid}  ` +
-            `${player.displayname}  ` +
-            `${holeScores.join(" ")}  ` +
-            `| Total ${total}`
+            `${id} ${name} ` +
+            `${front} | ${String(out).padStart(2)} | ` +
+            `${back} | ${String(inn).padStart(2)} | ` +
+            `${String(total).padStart(3)}`
         );
 
     }).join("\n");
+
+}
 
 }
 
