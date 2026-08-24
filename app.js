@@ -194,6 +194,29 @@ function buildScoreData() {
     });
 }
 
+function buildScoreSummary() {
+
+    return players.map(player => {
+
+        const holeScores = scores[player.playerid];
+
+        const total =
+            holeScores.reduce(
+                (sum, value) => sum + value,
+                0
+            );
+
+        return (
+            `${player.playerid}  ` +
+            `${player.displayname}  ` +
+            `${holeScores.join(" ")}  ` +
+            `| Total ${total}`
+        );
+
+    }).join("\n");
+
+}
+
 async function submitScores() {
     if (!verified || submitting || submitted) {
         return;
@@ -217,6 +240,9 @@ async function submitScores() {
         verifiedtimestamp:
             new Date().toISOString(),
         playercount: String(players.length),
+
+	summary: buildScoreSummary(),
+
         scores: JSON.stringify(
             buildScoreData(),
             null,
