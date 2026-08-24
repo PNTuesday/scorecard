@@ -241,8 +241,6 @@ function buildScoreSummary() {
 
 }
 
-}
-
 async function submitScores() {
     if (!verified || submitting || submitted) {
         return;
