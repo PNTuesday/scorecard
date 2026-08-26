@@ -11,8 +11,25 @@ let submitted = false;
 let submissionMessage = "";
 
 const scores = {};
+const confirmed = {};
 
 const STORAGE_PREFIX = "golf-scorecard:";
+
+
+function ensureConfirmationStyles() {
+    if (document.getElementById("confirmation-styles")) {
+        return;
+    }
+
+    const style = document.createElement("style");
+    style.id = "confirmation-styles";
+    style.textContent = `
+        .score-display { border: none; cursor: pointer; }
+        .score-unconfirmed { background: #d1d5db; color: #111827; }
+    `;
+
+    document.head.appendChild(style);
+}
 
 async function loadData() {
     try {
@@ -62,6 +79,7 @@ async function loadData() {
         initializeScores();
 
         restoreScores();
+        ensureConfirmationStyles();
 
         render();
         
@@ -103,6 +121,9 @@ function initializeScores() {
     players.forEach(player => {
         scores[player.playerid] =
             courseData.holes.map(hole => hole.par);
+
+        confirmed[player.playerid] =
+            courseData.holes.map(() => false);
     });
 }
 
@@ -134,11 +155,85 @@ function changeScore(playerIndex, delta) {
     scores[player.playerid][currentHole - 1] =
         newValue;
 
+    confirmed[player.playerid][currentHole - 1] = true;
+
     verified = false;
     submissionMessage = "";
 
     saveScores();
 
+    render();
+}
+
+function confirmCurrentScore(playerIndex) {
+    if (submitted) {
+        return;
+    }
+
+    const player = players[playerIndex];
+
+    confirmed[player.playerid][currentHole - 1] = true;
+    verified = false;
+    submissionMessage = "";
+
+    saveScores();
+    render();
+}
+
+function getMissingScores() {
+    const missing = [];
+
+    players.forEach(player => {
+        confirmed[player.playerid].forEach((isConfirmed, index) => {
+            if (!isConfirmed) {
+                missing.push({
+                    displayname: player.displayname,
+                    hole: index + 1
+                });
+            }
+        });
+    });
+
+    return missing;
+}
+
+function isScorecardComplete() {
+    return getMissingScores().length === 0;
+}
+
+function buildMissingScoreMessage() {
+    const missing = getMissingScores();
+    const grouped = {};
+
+    missing.forEach(item => {
+        if (!grouped[item.displayname]) {
+            grouped[item.displayname] = [];
+        }
+
+        grouped[item.displayname].push(`H${item.hole}`);
+    });
+
+    return "Scorecard incomplete. Missing confirmations: " +
+        Object.entries(grouped)
+            .map(([name, holes]) => `${name}: ${holes.join(", ")}`)
+            .join("; ");
+}
+
+function goToFirstMissingHole() {
+    const firstMissing = getMissingScores()[0];
+
+    if (!firstMissing) {
+        return;
+    }
+
+    currentHole = firstMissing.hole;
+    saveScores();
+    window.scrollTo(0, 0);
+}
+
+function reviewMissingScores() {
+    submissionMessage = buildMissingScoreMessage();
+    goToFirstMissingHole();
     render();
 }
 
@@ -165,9 +260,18 @@ function setVerified(isChecked) {
         return;
     }
 
+    if (isChecked && !isScorecardComplete()) {
+        verified = false;
+        submissionMessage = buildMissingScoreMessage();
+        goToFirstMissingHole();
+        render();
+        return;
+    }
+
     verified = isChecked;
     submissionMessage = "";
 
+    saveScores();
     render();
 }
 
@@ -251,7 +355,22 @@ function buildScoreSummary() {
 }
 
 async function submitScores() {
-    if (!verified || submitting || submitted) {
+    if (submitting || submitted) {
+        return;
+    }
+
+    if (!isScorecardComplete()) {
+        verified = false;
+        submissionMessage = buildMissingScoreMessage();
+        goToFirstMissingHole();
+        render();
+        return;
+    }
+
+    if (!verified) {
+        submissionMessage =
+            "Verify the completed scores against the paper scorecard before submitting.";
+        render();
         return;
     }
 
@@ -394,10 +513,15 @@ function render() {
                     currentHole - 1
                 ];
 
+            const isConfirmed =
+                confirmed[player.playerid][currentHole - 1];
+
             const scoreClass =
                 score === 0
                     ? "score-zero"
-                    : "score-normal";
+                    : isConfirmed
+                        ? "score-normal"
+                        : "score-unconfirmed";
 
             html += `
                 <div class="score-card">
@@ -432,13 +556,13 @@ function render() {
                             ◀
                         </button>
 
-                        <div
-                            class="
-                                score-display
-                                ${scoreClass}
-                            ">
+                        <button
+                            class="score-display ${scoreClass}"
+                            onclick="confirmCurrentScore(${playerIndex})"
+                            ${submitted ? "disabled" : ""}
+                            aria-label="Confirm score ${score} for ${escapeHtml(player.displayname)}">
                             ${score}
-                        </div>
+                        </button>
 
                         <button
                             class="arrow-btn"
@@ -490,45 +614,60 @@ function render() {
     `;
 
     if (!submitted) {
-        html += `
-            <label>
-                <input
-                    type="checkbox"
-                    onchange="
-                        setVerified(this.checked)
-                    "
-                    ${verified ? "checked" : ""}>
+        const missingCount = getMissingScores().length;
 
-                I have verified these scores
-                against the paper scorecard.
-            </label>
-        `;
-
-        if (verified) {
+        if (missingCount > 0) {
             html += `
+                <p style="margin: 0 0 10px; color: #991b1b; font-weight: bold;">
+                    ${missingCount} score confirmation${missingCount === 1 ? "" : "s"} remaining.
+                </p>
+
                 <button
-                    onclick="submitScores()"
-                    ${submitting ? "disabled" : ""}
+                    onclick="reviewMissingScores()"
                     style="
                         width: 100%;
-                        margin-top: 12px;
                         padding: 14px;
                         border: none;
                         border-radius: 10px;
-                        background: #065f46;
-                        color: white;
+                        background: #f59e0b;
+                        color: #111827;
                         font-size: 1rem;
                         font-weight: bold;
                     ">
-
-                    ${
-                        submitting
-                            ? "Submitting..."
-                            : "Submit Verified Scores"
-                    }
-
+                    Review Missing Scores
                 </button>
             `;
+        } else {
+            html += `
+                <label>
+                    <input
+                        type="checkbox"
+                        onchange="setVerified(this.checked)"
+                        ${verified ? "checked" : ""}>
+                    I have verified these scores against the paper scorecard.
+                </label>
+            `;
+
+            if (verified) {
+                html += `
+                    <button
+                        onclick="submitScores()"
+                        ${submitting ? "disabled" : ""}
+                        style="
+                            width: 100%;
+                            margin-top: 12px;
+                            padding: 14px;
+                            border: none;
+                            border-radius: 10px;
+                            background: #065f46;
+                            color: white;
+                            font-size: 1rem;
+                            font-weight: bold;
+                        ">
+                        ${submitting ? "Submitting..." : "Submit Verified Scores"}
+                    </button>
+                `;
+            }
         }
     }
 
@@ -584,7 +723,8 @@ function saveScores() {
 
     const saveData = {
         currentHole,
-        scores
+        scores,
+        confirmed
     };
 
     localStorage.setItem(
@@ -637,6 +777,18 @@ function restoreScores() {
                                 playerId
                             ];
 
+                }
+
+            });
+
+        }
+
+        if (savedData.confirmed) {
+
+            Object.keys(savedData.confirmed).forEach(playerId => {
+
+                if (confirmed[playerId]) {
+                    confirmed[playerId] = savedData.confirmed[playerId];
                 }
 
             });
