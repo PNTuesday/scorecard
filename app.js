@@ -12,6 +12,8 @@ let submissionMessage = "";
 
 const scores = {};
 
+const STORAGE_PREFIX = "golf-scorecard:";
+
 async function loadData() {
     try {
         const roundId = getRoundIdFromUrl();
@@ -58,8 +60,11 @@ async function loadData() {
         }
 
         initializeScores();
-        render();
 
+        restoreScores();
+
+        render();
+        
     } catch (error) {
         console.error(error);
 
@@ -132,12 +137,15 @@ function changeScore(playerIndex, delta) {
     verified = false;
     submissionMessage = "";
 
+    saveScores();
+
     render();
 }
 
 function nextHole() {
     if (currentHole < courseData.holes.length) {
         currentHole++;
+        saveScores();
         render();
         window.scrollTo(0, 0);
     }
@@ -146,6 +154,7 @@ function nextHole() {
 function previousHole() {
     if (currentHole > 1) {
         currentHole--;
+        saveScores();
         render();
         window.scrollTo(0, 0);
     }
@@ -558,4 +567,94 @@ function escapeHtml(value) {
         .replaceAll("'", "&#039;");
 }
 
+function getStorageKey() {
+
+    return (
+        STORAGE_PREFIX +
+        String(roundData.roundid)
+    );
+
+}
+
+function saveScores() {
+
+    if (!roundData) {
+        return;
+    }
+
+    const saveData = {
+        currentHole,
+        scores
+    };
+
+    localStorage.setItem(
+        getStorageKey(),
+        JSON.stringify(saveData)
+    );
+
+}
+
+function restoreScores() {
+
+    if (!roundData) {
+        return;
+    }
+
+    const savedText =
+        localStorage.getItem(
+            getStorageKey()
+        );
+
+    if (!savedText) {
+        return;
+    }
+
+    try {
+
+        const savedData =
+            JSON.parse(savedText);
+
+        if (savedData.currentHole) {
+
+            currentHole =
+                savedData.currentHole;
+
+        }
+
+        if (savedData.scores) {
+
+            Object.keys(
+                savedData.scores
+            ).forEach(playerId => {
+
+                if (
+                    scores[playerId]
+                ) {
+
+                    scores[playerId] =
+                        savedData
+                            .scores[
+                                playerId
+                            ];
+
+                }
+
+            });
+
+        }
+
+        submissionMessage =
+            "Saved scorecard restored.";
+
+    }
+    catch (error) {
+
+        console.error(
+            "Restore failed",
+            error
+        );
+
+    }
+
+}
 loadData();
