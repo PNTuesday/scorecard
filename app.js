@@ -24,6 +24,23 @@ function ensureConfirmationStyles() {
     style.textContent = `
         .score-display { border: none; cursor: pointer; }
         .score-unconfirmed { background: #d1d5db; color: #111827; }
+        .progress-card { overflow-x: auto; }
+        .progress-title { margin: 0 0 8px; color: #111827; }
+        .progress-grid {
+            display: grid;
+            grid-template-columns: 2.25rem repeat(9, minmax(1.45rem, 1fr)) 2.4rem;
+            gap: 2px;
+            align-items: center;
+            min-width: 22rem;
+            color: #111827;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.72rem;
+            line-height: 1.35;
+            text-align: center;
+        }
+        .progress-grid .progress-name { text-align: left; font-weight: bold; }
+        .progress-grid .progress-header { font-weight: bold; }
+        .progress-grid .progress-total { font-weight: bold; }
     `;
     document.head.appendChild(style);
 }
@@ -123,17 +140,6 @@ function initializeScores() {
     });
 }
 
-function total(playerId) {
-    let playerTotal = 0;
-
-    for (let i = 0; i < currentHole; i++) {
-        if (confirmed[playerId][i]) {
-            playerTotal += scores[playerId][i];
-        }
-    }
-
-    return playerTotal;
-}
 
 function changeScore(playerIndex, delta) {
     if (submitted) {
@@ -200,19 +206,76 @@ function isCurrentHoleComplete() {
     );
 }
 
-function lastCompletedHole() {
-    let completedThrough = 0;
 
-    for (let holeIndex = 0; holeIndex < courseData.holes.length; holeIndex++) {
-        const holeComplete = players.every(player =>
-            confirmed[player.playerid][holeIndex]
-        );
+function getPlayerInitials(displayName) {
+    const parts = String(displayName)
+        .replaceAll(".", "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
 
-        if (!holeComplete) break;
-        completedThrough = holeIndex + 1;
+    if (parts.length === 0) return "";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+
+    return (
+        parts[0].charAt(0) +
+        parts[parts.length - 1].charAt(0)
+    ).toUpperCase();
+}
+
+function confirmedNineTotal(playerId, startIndex) {
+    let nineTotal = 0;
+
+    for (let index = startIndex; index < startIndex + 9; index++) {
+        if (confirmed[playerId][index]) {
+            nineTotal += scores[playerId][index];
+        }
     }
 
-    return completedThrough;
+    return nineTotal;
+}
+
+function buildProgressScorecard() {
+    const frontNine = currentHole <= 9;
+    const startIndex = frontNine ? 0 : 9;
+    const totalLabel = frontNine ? "OUT" : "IN";
+    const holeNumbers = Array.from(
+        { length: 9 },
+        (_, index) => startIndex + index + 1
+    );
+
+    let progressHtml = `
+        <div class="score-card progress-card">
+            <h2 class="progress-title">Scorecard Progress</h2>
+            <div class="progress-grid">
+                <span class="progress-header"></span>
+                ${holeNumbers.map(hole =>
+                    `<span class="progress-header">${hole}</span>`
+                ).join("")}
+                <span class="progress-header progress-total">${totalLabel}</span>
+    `;
+
+    players.forEach(player => {
+        const playerId = player.playerid;
+
+        progressHtml += `
+            <span class="progress-name">${escapeHtml(getPlayerInitials(player.displayname))}</span>
+            ${holeNumbers.map(hole => {
+                const index = hole - 1;
+                return `<span>${confirmed[playerId][index]
+                    ? scores[playerId][index]
+                    : "-"}</span>`;
+            }).join("")}
+            <span class="progress-total">${confirmedNineTotal(playerId, startIndex)}</span>
+        `;
+    });
+
+    progressHtml += `
+            </div>
+        </div>
+    `;
+
+    return progressHtml;
 }
 
 function buildMissingScoreMessage() {
@@ -627,34 +690,9 @@ function render() {
         }
     );
 
-    html += `
-        <div class="totals">
-            <h2>
-                ${lastCompletedHole() > 0
-                    ? `Confirmed through Hole ${lastCompletedHole()}`
-                    : "No holes confirmed yet"}
-            </h2>
-    `;
-
-    players.forEach(player => {
-        html += `
-            <div class="total-player">
-                <span>
-                    ${escapeHtml(
-                        player.displayname
-                    )}
-                </span>
-
-                <strong>
-                    ${total(player.playerid)}
-                </strong>
-            </div>
-        `;
-    });
+    html += buildProgressScorecard();
 
     html += `
-        </div>
-
         <div class="score-card">
     `;
 
