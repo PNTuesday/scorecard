@@ -17,9 +17,7 @@ const STORAGE_PREFIX = "golf-scorecard:";
 
 
 function ensureConfirmationStyles() {
-    if (document.getElementById("confirmation-styles")) {
-        return;
-    }
+    if (document.getElementById("confirmation-styles")) return;
 
     const style = document.createElement("style");
     style.id = "confirmation-styles";
@@ -27,7 +25,6 @@ function ensureConfirmationStyles() {
         .score-display { border: none; cursor: pointer; }
         .score-unconfirmed { background: #d1d5db; color: #111827; }
     `;
-
     document.head.appendChild(style);
 }
 
@@ -121,7 +118,6 @@ function initializeScores() {
     players.forEach(player => {
         scores[player.playerid] =
             courseData.holes.map(hole => hole.par);
-
         confirmed[player.playerid] =
             courseData.holes.map(() => false);
     });
@@ -131,7 +127,9 @@ function total(playerId) {
     let playerTotal = 0;
 
     for (let i = 0; i < currentHole; i++) {
-        playerTotal += scores[playerId][i];
+        if (confirmed[playerId][i]) {
+            playerTotal += scores[playerId][i];
+        }
     }
 
     return playerTotal;
@@ -154,7 +152,6 @@ function changeScore(playerIndex, delta) {
 
     scores[player.playerid][currentHole - 1] =
         newValue;
-
     confirmed[player.playerid][currentHole - 1] = true;
 
     verified = false;
@@ -166,16 +163,12 @@ function changeScore(playerIndex, delta) {
 }
 
 function confirmCurrentScore(playerIndex) {
-    if (submitted) {
-        return;
-    }
+    if (submitted) return;
 
     const player = players[playerIndex];
-
     confirmed[player.playerid][currentHole - 1] = true;
     verified = false;
     submissionMessage = "";
-
     saveScores();
     render();
 }
@@ -201,15 +194,32 @@ function isScorecardComplete() {
     return getMissingScores().length === 0;
 }
 
+function isCurrentHoleComplete() {
+    return players.every(player =>
+        confirmed[player.playerid][currentHole - 1]
+    );
+}
+
+function lastCompletedHole() {
+    let completedThrough = 0;
+
+    for (let holeIndex = 0; holeIndex < courseData.holes.length; holeIndex++) {
+        const holeComplete = players.every(player =>
+            confirmed[player.playerid][holeIndex]
+        );
+
+        if (!holeComplete) break;
+        completedThrough = holeIndex + 1;
+    }
+
+    return completedThrough;
+}
+
 function buildMissingScoreMessage() {
-    const missing = getMissingScores();
     const grouped = {};
 
-    missing.forEach(item => {
-        if (!grouped[item.displayname]) {
-            grouped[item.displayname] = [];
-        }
-
+    getMissingScores().forEach(item => {
+        if (!grouped[item.displayname]) grouped[item.displayname] = [];
         grouped[item.displayname].push(`H${item.hole}`);
     });
 
@@ -221,10 +231,7 @@ function buildMissingScoreMessage() {
 
 function goToFirstMissingHole() {
     const firstMissing = getMissingScores()[0];
-
-    if (!firstMissing) {
-        return;
-    }
+    if (!firstMissing) return;
 
     currentHole = firstMissing.hole;
     saveScores();
@@ -234,6 +241,26 @@ function goToFirstMissingHole() {
 function reviewMissingScores() {
     submissionMessage = buildMissingScoreMessage();
     goToFirstMissingHole();
+    render();
+}
+
+function saveCurrentHole() {
+    if (!isCurrentHoleComplete()) {
+        submissionMessage =
+            `Hole ${currentHole} is incomplete. Confirm every player's score before saving.`;
+        render();
+        return;
+    }
+
+    submissionMessage = `Hole ${currentHole} saved.`;
+    saveScores();
+
+    if (currentHole < courseData.holes.length) {
+        currentHole++;
+        saveScores();
+        window.scrollTo(0, 0);
+    }
+
     render();
 }
 
@@ -256,9 +283,7 @@ function previousHole() {
 }
 
 function setVerified(isChecked) {
-    if (submitted) {
-        return;
-    }
+    if (submitted) return;
 
     if (isChecked && !isScorecardComplete()) {
         verified = false;
@@ -270,7 +295,6 @@ function setVerified(isChecked) {
 
     verified = isChecked;
     submissionMessage = "";
-
     saveScores();
     render();
 }
@@ -355,9 +379,7 @@ function buildScoreSummary() {
 }
 
 async function submitScores() {
-    if (submitting || submitted) {
-        return;
-    }
+    if (submitting || submitted) return;
 
     if (!isScorecardComplete()) {
         verified = false;
@@ -502,6 +524,25 @@ function render() {
                     </button>
 
                 </div>
+
+                <button
+                    onclick="saveCurrentHole()"
+                    ${isCurrentHoleComplete() || submitted ? "" : "disabled"}
+                    style="
+                        width: 100%;
+                        margin-top: 10px;
+                        padding: 12px;
+                        border: none;
+                        border-radius: 10px;
+                        background: ${isCurrentHoleComplete() ? "#065f46" : "#9ca3af"};
+                        color: white;
+                        font-size: 1rem;
+                        font-weight: bold;
+                    ">
+                    ${currentHole < courseData.holes.length
+                        ? "Save Hole & Go to Next"
+                        : "Save Hole 18"}
+                </button>
             </div>
     `;
 
@@ -588,7 +629,11 @@ function render() {
 
     html += `
         <div class="totals">
-            <h2>Through Hole ${currentHole}</h2>
+            <h2>
+                ${lastCompletedHole() > 0
+                    ? `Confirmed through Hole ${lastCompletedHole()}`
+                    : "No holes confirmed yet"}
+            </h2>
     `;
 
     players.forEach(player => {
@@ -621,18 +666,12 @@ function render() {
                 <p style="margin: 0 0 10px; color: #991b1b; font-weight: bold;">
                     ${missingCount} score confirmation${missingCount === 1 ? "" : "s"} remaining.
                 </p>
-
                 <button
                     onclick="reviewMissingScores()"
                     style="
-                        width: 100%;
-                        padding: 14px;
-                        border: none;
-                        border-radius: 10px;
-                        background: #f59e0b;
-                        color: #111827;
-                        font-size: 1rem;
-                        font-weight: bold;
+                        width: 100%; padding: 14px; border: none;
+                        border-radius: 10px; background: #f59e0b;
+                        color: #111827; font-size: 1rem; font-weight: bold;
                     ">
                     Review Missing Scores
                 </button>
@@ -654,15 +693,10 @@ function render() {
                         onclick="submitScores()"
                         ${submitting ? "disabled" : ""}
                         style="
-                            width: 100%;
-                            margin-top: 12px;
-                            padding: 14px;
-                            border: none;
-                            border-radius: 10px;
-                            background: #065f46;
-                            color: white;
-                            font-size: 1rem;
-                            font-weight: bold;
+                            width: 100%; margin-top: 12px; padding: 14px;
+                            border: none; border-radius: 10px;
+                            background: #065f46; color: white;
+                            font-size: 1rem; font-weight: bold;
                         ">
                         ${submitting ? "Submitting..." : "Submit Verified Scores"}
                     </button>
@@ -784,15 +818,11 @@ function restoreScores() {
         }
 
         if (savedData.confirmed) {
-
             Object.keys(savedData.confirmed).forEach(playerId => {
-
                 if (confirmed[playerId]) {
                     confirmed[playerId] = savedData.confirmed[playerId];
                 }
-
             });
-
         }
 
         submissionMessage =
