@@ -1,14 +1,14 @@
 ﻿{
-  "roundid": "T292T7",
-  "group": "E",
-  "date": "2026-08-25",
+  "roundid": "8RQBDS",
+  "group": "B",
+  "date": "2026-09-01",
   "course": "The Neck",
   "players": [
     {
-      "playerid": "P0045",
-      "displayname": "Daniel M.",
-      "hcp": 6,
-      "tee": "White"
+      "playerid": "P0016",
+      "displayname": "Jerry C.",
+      "hcp": 5,
+      "tee": "Bhy"
     },
     {
       "playerid": "P0050",
@@ -17,10 +17,10 @@
       "tee": "Why"
     },
     {
-      "playerid": "P0009",
-      "displayname": "Bob B.",
-      "hcp": 10,
-      "tee": "Bhy"
+      "playerid": "P0035",
+      "displayname": "Bob L.",
+      "hcp": 13,
+      "tee": "Why"
     },
     {
       "playerid": "P0024",

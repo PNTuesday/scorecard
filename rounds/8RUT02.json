@@ -1,7 +1,7 @@
 ﻿{
-  "roundid": "T22CDS",
-  "group": "B",
-  "date": "2026-08-25",
+  "roundid": "8RUT02",
+  "group": "D",
+  "date": "2026-09-01",
   "course": "The Neck",
   "players": [
     {
@@ -11,21 +11,21 @@
       "tee": "White"
     },
     {
-      "playerid": "P0054",
-      "displayname": "Robert R.",
+      "playerid": "P0005",
+      "displayname": "Robert A.",
       "hcp": 9,
-      "tee": "Bhy"
+      "tee": "Why"
     },
     {
       "playerid": "P0042",
       "displayname": "Ted M.",
-      "hcp": 16,
-      "tee": "Why"
+      "hcp": 13,
+      "tee": "Bhy"
     },
     {
-      "playerid": "P0018",
-      "displayname": "Warren D.",
-      "hcp": 14,
+      "playerid": "P0059",
+      "displayname": "William S.",
+      "hcp": 16,
       "tee": "Green"
     }
   ]
