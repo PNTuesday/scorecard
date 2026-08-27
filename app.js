@@ -12,6 +12,8 @@ let submissionMessage = "";
 
 const scores = {};
 const confirmed = {};
+const savedHoles = Array(18).fill(false);
+const dirtyHoles = Array(18).fill(false);
 
 const STORAGE_PREFIX = "golf-scorecard:";
 
@@ -25,7 +27,7 @@ function ensureConfirmationStyles() {
         .score-display { border: none; cursor: pointer; }
         .score-unconfirmed { background: #d1d5db; color: #111827; }
         .progress-card { overflow-x: auto; }
-        .progress-title { margin: 0 0 8px; color: #111827; }
+        .progress-title { margin: 0 0 5px; color: #111827; font-size: 1.08rem; line-height: 1.05; }
         .progress-grid {
             display: grid;
             grid-template-columns: 2.25rem repeat(9, minmax(1.45rem, 1fr)) 2.4rem;
@@ -34,7 +36,7 @@ function ensureConfirmationStyles() {
             min-width: 22rem;
             color: #111827;
             font-family: Consolas, "Courier New", monospace;
-            font-size: 0.82rem;
+            font-size: 0.88rem;
             font-weight: 600;
             line-height: 1.4;
             text-align: center;
@@ -42,10 +44,10 @@ function ensureConfirmationStyles() {
         .progress-grid .progress-name { text-align: left; font-weight: 700; }
         .progress-grid .progress-header { font-weight: 700; }
         .progress-grid .progress-total { font-weight: 700; }
-        .player-score-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .player-score-row .player-name { margin: 0; font-size: 1.12rem; font-weight: 700; }
+        .player-score-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; line-height: 1; }
+        .player-score-row .player-name { margin: 0; padding: 0; font-size: 1.08rem; line-height: 1; font-weight: 700; }
         .player-score-row .score-selector { margin: 0; flex: 0 0 auto; }
-        .compact-player-card .player-details { margin-top: 2px; }
+        .compact-player-card .player-details { margin: 0; padding: 0; line-height: 1; }
     `;
     document.head.appendChild(style);
 }
@@ -178,6 +180,7 @@ function confirmCurrentScore(playerIndex) {
 
     const player = players[playerIndex];
     confirmed[player.playerid][currentHole - 1] = true;
+    if (savedHoles[currentHole - 1]) dirtyHoles[currentHole - 1] = true;
     verified = false;
     submissionMessage = "";
     saveScores();
@@ -211,6 +214,19 @@ function isCurrentHoleComplete() {
     );
 }
 
+
+function isCurrentHoleSaved() {
+    return savedHoles[currentHole - 1];
+}
+
+function getSaveButtonText() {
+    if (isCurrentHoleSaved() && !dirtyHoles[currentHole - 1]) return "Saved";
+    if (dirtyHoles[currentHole - 1]) return "Save Changes";
+
+    return currentHole < courseData.holes.length
+        ? "Save Hole & Go to Next"
+        : "Save Hole 18";
+}
 
 function getPlayerInitials(displayName) {
     const parts = String(displayName)
@@ -251,7 +267,7 @@ function buildProgressScorecard() {
 
     let progressHtml = `
         <div class="score-card progress-card">
-            <h2 class="progress-title">Scorecard Progress</h2>
+            <h2 class="progress-title">Progress</h2>
             <div class="progress-grid">
                 <span class="progress-header"></span>
                 ${holeNumbers.map(hole =>
@@ -336,6 +352,8 @@ function reviewMissingScores() {
 }
 
 function saveCurrentHole() {
+    if (isCurrentHoleSaved() && !dirtyHoles[currentHole - 1]) return;
+
     if (!isCurrentHoleComplete()) {
         submissionMessage =
             `Hole ${currentHole} is incomplete. Confirm every player's score before saving.`;
@@ -344,10 +362,14 @@ function saveCurrentHole() {
     }
 
     const savedHole = currentHole;
+    const isCorrection = dirtyHoles[savedHole - 1];
+
+    savedHoles[savedHole - 1] = true;
+    dirtyHoles[savedHole - 1] = false;
     submissionMessage = `Hole ${savedHole} saved.`;
     saveScores();
 
-    if (currentHole < courseData.holes.length) {
+    if (!isCorrection && currentHole < courseData.holes.length) {
         currentHole++;
         saveScores();
         window.scrollTo(0, 0);
@@ -626,21 +648,19 @@ function render() {
 
                 <button
                     onclick="saveCurrentHole()"
-                    ${isCurrentHoleComplete() || submitted ? "" : "disabled"}
+                    ${isCurrentHoleComplete() && (!isCurrentHoleSaved() || dirtyHoles[currentHole - 1]) && !submitted ? "" : "disabled"}
                     style="
                         width: 100%;
                         margin-top: 10px;
                         padding: 12px;
                         border: none;
                         border-radius: 10px;
-                        background: ${isCurrentHoleComplete() ? "#065f46" : "#9ca3af"};
+                        background: ${isCurrentHoleComplete() && (!isCurrentHoleSaved() || dirtyHoles[currentHole - 1]) ? "#065f46" : "#9ca3af"};
                         color: white;
                         font-size: 1rem;
                         font-weight: bold;
                     ">
-                    ${currentHole < courseData.holes.length
-                        ? "Save Hole & Go to Next"
-                        : "Save Hole 18"}
+                    ${getSaveButtonText()}
                 </button>
             </div>
     `;
@@ -803,7 +823,9 @@ function saveScores() {
     const saveData = {
         currentHole,
         scores,
-        confirmed
+        confirmed,
+        savedHoles,
+        dirtyHoles
     };
 
     localStorage.setItem(
@@ -867,6 +889,18 @@ function restoreScores() {
                 if (confirmed[playerId]) {
                     confirmed[playerId] = savedData.confirmed[playerId];
                 }
+            });
+        }
+
+        if (Array.isArray(savedData.savedHoles)) {
+            savedData.savedHoles.slice(0, 18).forEach((saved, index) => {
+                savedHoles[index] = Boolean(saved);
+            });
+        }
+
+        if (Array.isArray(savedData.dirtyHoles)) {
+            savedData.dirtyHoles.slice(0, 18).forEach((dirty, index) => {
+                dirtyHoles[index] = Boolean(dirty);
             });
         }
 
