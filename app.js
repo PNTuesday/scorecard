@@ -34,13 +34,18 @@ function ensureConfirmationStyles() {
             min-width: 22rem;
             color: #111827;
             font-family: Consolas, "Courier New", monospace;
-            font-size: 0.72rem;
-            line-height: 1.35;
+            font-size: 0.82rem;
+            font-weight: 600;
+            line-height: 1.4;
             text-align: center;
         }
-        .progress-grid .progress-name { text-align: left; font-weight: bold; }
-        .progress-grid .progress-header { font-weight: bold; }
-        .progress-grid .progress-total { font-weight: bold; }
+        .progress-grid .progress-name { text-align: left; font-weight: 700; }
+        .progress-grid .progress-header { font-weight: 700; }
+        .progress-grid .progress-total { font-weight: 700; }
+        .player-score-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .player-score-row .player-name { margin: 0; font-size: 1.12rem; font-weight: 700; }
+        .player-score-row .score-selector { margin: 0; flex: 0 0 auto; }
+        .compact-player-card .player-details { margin-top: 2px; }
     `;
     document.head.appendChild(style);
 }
@@ -301,9 +306,32 @@ function goToFirstMissingHole() {
     window.scrollTo(0, 0);
 }
 
+function getGapScores() {
+    let furthestConfirmedHole = 0;
+
+    players.forEach(player => {
+        confirmed[player.playerid].forEach((isConfirmed, index) => {
+            if (isConfirmed) {
+                furthestConfirmedHole = Math.max(furthestConfirmedHole, index + 1);
+            }
+        });
+    });
+
+    return getMissingScores().filter(item => item.hole < furthestConfirmedHole);
+}
+
+function hasScoreGap() {
+    return getGapScores().length > 0;
+}
+
 function reviewMissingScores() {
-    submissionMessage = buildMissingScoreMessage();
-    goToFirstMissingHole();
+    const firstGap = getGapScores()[0];
+    if (!firstGap) return;
+
+    currentHole = firstGap.hole;
+    submissionMessage = "";
+    saveScores();
+    window.scrollTo(0, 0);
     render();
 }
 
@@ -315,7 +343,8 @@ function saveCurrentHole() {
         return;
     }
 
-    submissionMessage = `Hole ${currentHole} saved.`;
+    const savedHole = currentHole;
+    submissionMessage = `Hole ${savedHole} saved.`;
     saveScores();
 
     if (currentHole < courseData.holes.length) {
@@ -325,6 +354,13 @@ function saveCurrentHole() {
     }
 
     render();
+
+    window.setTimeout(() => {
+        if (submissionMessage === `Hole ${savedHole} saved.`) {
+            submissionMessage = "";
+            render();
+        }
+    }, 2500);
 }
 
 function nextHole() {
@@ -628,62 +664,36 @@ function render() {
                         : "score-unconfirmed";
 
             html += `
-                <div class="score-card">
-
-                    <div class="player-name">
-                        ${escapeHtml(
-                            player.displayname
-                        )}
+                <div class="score-card compact-player-card">
+                    <div class="player-score-row">
+                        <div class="player-name">
+                            ${escapeHtml(player.displayname)}
+                        </div>
+                        <div class="score-selector">
+                            <button
+                                class="arrow-btn"
+                                onclick="changeScore(${playerIndex}, -1)"
+                                ${submitted ? "disabled" : ""}>
+                                ◀
+                            </button>
+                            <button
+                                class="score-display ${scoreClass}"
+                                onclick="confirmCurrentScore(${playerIndex})"
+                                ${submitted ? "disabled" : ""}
+                                aria-label="Confirm score ${score} for ${escapeHtml(player.displayname)}">
+                                ${score}
+                            </button>
+                            <button
+                                class="arrow-btn"
+                                onclick="changeScore(${playerIndex}, 1)"
+                                ${submitted ? "disabled" : ""}>
+                                ▶
+                            </button>
+                        </div>
                     </div>
-
                     <div class="player-details">
-                        ${escapeHtml(player.tee)}
-                        Tee |
+                        ${escapeHtml(player.tee)} Tee |
                         HCP ${escapeHtml(player.hcp)}
-                    </div>
-
-                    <div class="score-selector">
-
-                        <button
-                            class="arrow-btn"
-                            onclick="
-                                changeScore(
-                                    ${playerIndex},
-                                    -1
-                                )
-                            "
-                            ${
-                                submitted
-                                    ? "disabled"
-                                    : ""
-                            }>
-                            ◀
-                        </button>
-
-                        <button
-                            class="score-display ${scoreClass}"
-                            onclick="confirmCurrentScore(${playerIndex})"
-                            ${submitted ? "disabled" : ""}
-                            aria-label="Confirm score ${score} for ${escapeHtml(player.displayname)}">
-                            ${score}
-                        </button>
-
-                        <button
-                            class="arrow-btn"
-                            onclick="
-                                changeScore(
-                                    ${playerIndex},
-                                    1
-                                )
-                            "
-                            ${
-                                submitted
-                                    ? "disabled"
-                                    : ""
-                            }>
-                            ▶
-                        </button>
-
                     </div>
                 </div>
             `;
@@ -697,13 +707,8 @@ function render() {
     `;
 
     if (!submitted) {
-        const missingCount = getMissingScores().length;
-
-        if (missingCount > 0) {
+        if (hasScoreGap()) {
             html += `
-                <p style="margin: 0 0 10px; color: #991b1b; font-weight: bold;">
-                    ${missingCount} score confirmation${missingCount === 1 ? "" : "s"} remaining.
-                </p>
                 <button
                     onclick="reviewMissingScores()"
                     style="
@@ -714,7 +719,9 @@ function render() {
                     Review Missing Scores
                 </button>
             `;
-        } else {
+        }
+
+        if (isScorecardComplete()) {
             html += `
                 <label>
                     <input
