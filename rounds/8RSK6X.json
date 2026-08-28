@@ -5,20 +5,20 @@
   "course": "The Neck",
   "players": [
     {
-      "playerid": "P0045",
-      "displayname": "Daniel M.",
-      "hcp": 6,
+      "playerid": "P0027",
+      "displayname": "Thomas H.",
+      "hcp": 8,
       "tee": "White"
     },
     {
-      "playerid": "P0013",
-      "displayname": "Kevin C.",
+      "playerid": "P0054",
+      "displayname": "Robert R.",
       "hcp": 9,
-      "tee": "Why"
+      "tee": "Bhy"
     },
     {
-      "playerid": "P0066",
-      "displayname": "Kevin W.",
+      "playerid": "P0035",
+      "displayname": "Bob L.",
       "hcp": 13,
       "tee": "Why"
     },

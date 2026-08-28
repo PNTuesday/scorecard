@@ -5,14 +5,14 @@
   "course": "The Neck",
   "players": [
     {
-      "playerid": "P0023",
-      "displayname": "Jan G.",
-      "hcp": 6,
-      "tee": "Bhy"
+      "playerid": "P0005",
+      "displayname": "Robert A.",
+      "hcp": 9,
+      "tee": "Why"
     },
     {
-      "playerid": "P0054",
-      "displayname": "Robert R.",
+      "playerid": "P0031",
+      "displayname": "Bob J.",
       "hcp": 9,
       "tee": "Bhy"
     },
@@ -23,10 +23,10 @@
       "tee": "Why"
     },
     {
-      "playerid": "P0067",
-      "displayname": "Roger Y.",
-      "hcp": 16,
-      "tee": "Bhy"
+      "playerid": "P0043",
+      "displayname": "Grady M.",
+      "hcp": 15,
+      "tee": "Green"
     }
   ]
 }
