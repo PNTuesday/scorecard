@@ -9,6 +9,7 @@ let verified = false;
 let submitting = false;
 let submitted = false;
 let submissionMessage = "";
+let fullScorecardOpen = false;
 
 const scores = {};
 const confirmed = {};
@@ -48,6 +49,19 @@ function ensureConfirmationStyles() {
         .player-score-row .player-name { margin: 0; padding: 0; font-size: 1.08rem; line-height: 1; font-weight: 700; }
         .player-score-row .score-selector { margin: 0; flex: 0 0 auto; }
         .compact-player-card .player-details { margin: 0; padding: 0; line-height: 1; }
+        .progress-actions { margin-top: 8px; }
+        .full-scorecard-btn { width: 100%; padding: 10px; border: none; border-radius: 9px; background: #1f4f3d; color: white; font-weight: 700; }
+        .scorecard-overlay { position: fixed; inset: 0; z-index: 9999; background: white; color: #111827; padding: 10px; overflow: auto; }
+        .scorecard-overlay-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .scorecard-overlay-header h2 { margin: 0; font-size: 1.1rem; }
+        .scorecard-close-btn { padding: 8px 12px; border: none; border-radius: 8px; background: #444; color: white; font-weight: 700; }
+        .full-scorecard-wrap { overflow-x: auto; }
+        .full-scorecard { border-collapse: collapse; min-width: 900px; width: 100%; font-family: Consolas, "Courier New", monospace; font-size: 0.82rem; font-weight: 700; text-align: center; }
+        .full-scorecard th, .full-scorecard td { border: 1px solid #777; padding: 5px 4px; white-space: nowrap; }
+        .full-scorecard th:first-child, .full-scorecard td:first-child { position: sticky; left: 0; background: white; text-align: left; min-width: 44px; }
+        .full-scorecard .subtotal { background: #eeeeee; }
+        .rotate-note { margin: 4px 0 8px; font-size: 0.8rem; }
+
     `;
     document.head.appendChild(style);
 }
@@ -149,29 +163,27 @@ function initializeScores() {
 
 
 function changeScore(playerIndex, delta) {
-    if (submitted) {
-        return;
-    }
+    if (submitted) return;
 
     const player = players[playerIndex];
+    const playerId = player.playerid;
+    const currentValue = scores[playerId][currentHole - 1];
+    const newValue = Math.min(8, Math.max(0, currentValue + delta));
 
-    const currentValue =
-        scores[player.playerid][currentHole - 1];
+    if (newValue === currentValue) return;
 
-    const newValue = Math.min(
-        8,
-        Math.max(0, currentValue + delta)
-    );
+    scores[playerId][currentHole - 1] = newValue;
 
-    scores[player.playerid][currentHole - 1] =
-        newValue;
-    confirmed[player.playerid][currentHole - 1] = true;
+    if (savedHoles[currentHole - 1]) {
+        dirtyHoles[currentHole - 1] = true;
+        confirmed[playerId][currentHole - 1] = false;
+    } else {
+        confirmed[playerId][currentHole - 1] = true;
+    }
 
     verified = false;
     submissionMessage = "";
-
     saveScores();
-
     render();
 }
 
@@ -179,8 +191,14 @@ function confirmCurrentScore(playerIndex) {
     if (submitted) return;
 
     const player = players[playerIndex];
-    confirmed[player.playerid][currentHole - 1] = true;
-    if (savedHoles[currentHole - 1]) dirtyHoles[currentHole - 1] = true;
+    const playerId = player.playerid;
+    const holeIndex = currentHole - 1;
+
+    if (savedHoles[holeIndex] && confirmed[playerId][holeIndex]) {
+        return;
+    }
+
+    confirmed[playerId][holeIndex] = true;
     verified = false;
     submissionMessage = "";
     saveScores();
@@ -219,13 +237,21 @@ function isCurrentHoleSaved() {
     return savedHoles[currentHole - 1];
 }
 
+function hasUnsavedChanges() {
+    return dirtyHoles[currentHole - 1];
+}
+
 function getSaveButtonText() {
-    if (isCurrentHoleSaved() && !dirtyHoles[currentHole - 1]) return "Saved";
-    if (dirtyHoles[currentHole - 1]) return "Save Changes";
+    if (hasUnsavedChanges()) return "Save Changes";
+    if (isCurrentHoleSaved()) return "Saved";
 
     return currentHole < courseData.holes.length
         ? "Save Hole & Go to Next"
         : "Save Hole 18";
+}
+
+function canNavigateAway() {
+    return !hasUnsavedChanges();
 }
 
 function getPlayerInitials(displayName) {
@@ -293,10 +319,110 @@ function buildProgressScorecard() {
 
     progressHtml += `
             </div>
+            ${isScorecardComplete() ? `
+                <div class="progress-actions">
+                    <button class="full-scorecard-btn" onclick="openFullScorecard()">
+                        View Full Scorecard
+                    </button>
+                </div>
+            ` : ""}
         </div>
     `;
 
     return progressHtml;
+}
+
+function fullRoundTotal(playerId) {
+    return scores[playerId].reduce((sum, value) => sum + value, 0);
+}
+
+function buildFullScorecard() {
+    const frontHoles = Array.from({ length: 9 }, (_, index) => index + 1);
+    const backHoles = Array.from({ length: 9 }, (_, index) => index + 10);
+
+    let html = `
+        <div class="scorecard-overlay" id="full-scorecard-overlay">
+            <div class="scorecard-overlay-header">
+                <h2>Group ${escapeHtml(roundData.group)} Full Scorecard</h2>
+                <button class="scorecard-close-btn" onclick="closeFullScorecard()">Close</button>
+            </div>
+            <p class="rotate-note">Rotate the phone to landscape for the widest view. Swipe sideways if needed.</p>
+            <div class="full-scorecard-wrap">
+                <table class="full-scorecard">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            ${frontHoles.map(hole => `<th>${hole}</th>`).join("")}
+                            <th class="subtotal">OUT</th>
+                            ${backHoles.map(hole => `<th>${hole}</th>`).join("")}
+                            <th class="subtotal">IN</th>
+                            <th class="subtotal">TOT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    `;
+
+    players.forEach(player => {
+        const playerId = player.playerid;
+        html += `
+            <tr>
+                <td>${escapeHtml(getPlayerInitials(player.displayname))}</td>
+                ${frontHoles.map(hole => `<td>${scores[playerId][hole - 1]}</td>`).join("")}
+                <td class="subtotal">${confirmedNineTotal(playerId, 0)}</td>
+                ${backHoles.map(hole => `<td>${scores[playerId][hole - 1]}</td>`).join("")}
+                <td class="subtotal">${confirmedNineTotal(playerId, 9)}</td>
+                <td class="subtotal">${fullRoundTotal(playerId)}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    return html;
+}
+
+async function openFullScorecard() {
+    if (!isScorecardComplete()) return;
+
+    fullScorecardOpen = true;
+    render();
+
+    const overlay = document.getElementById("full-scorecard-overlay");
+
+    try {
+        if (overlay?.requestFullscreen) {
+            await overlay.requestFullscreen();
+        }
+
+        if (screen.orientation?.lock) {
+            await screen.orientation.lock("landscape");
+        }
+    } catch (error) {
+        console.info("Landscape lock is not available in this browser.", error);
+    }
+}
+
+function closeFullScorecard() {
+    fullScorecardOpen = false;
+
+    try {
+        if (screen.orientation?.unlock) {
+            screen.orientation.unlock();
+        }
+    } catch (error) {
+        console.info("Orientation unlock is not available.", error);
+    }
+
+    if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+    }
+
+    render();
 }
 
 function buildMissingScoreMessage() {
@@ -352,7 +478,7 @@ function reviewMissingScores() {
 }
 
 function saveCurrentHole() {
-    if (isCurrentHoleSaved() && !dirtyHoles[currentHole - 1]) return;
+    if (isCurrentHoleSaved() && !hasUnsavedChanges()) return;
 
     if (!isCurrentHoleComplete()) {
         submissionMessage =
@@ -362,7 +488,7 @@ function saveCurrentHole() {
     }
 
     const savedHole = currentHole;
-    const isCorrection = dirtyHoles[savedHole - 1];
+    const isCorrection = hasUnsavedChanges();
 
     savedHoles[savedHole - 1] = true;
     dirtyHoles[savedHole - 1] = false;
@@ -386,6 +512,8 @@ function saveCurrentHole() {
 }
 
 function nextHole() {
+    if (!canNavigateAway()) return;
+
     if (currentHole < courseData.holes.length) {
         currentHole++;
         saveScores();
@@ -395,6 +523,8 @@ function nextHole() {
 }
 
 function previousHole() {
+    if (!canNavigateAway()) return;
+
     if (currentHole > 1) {
         currentHole--;
         saveScores();
@@ -626,7 +756,7 @@ function render() {
                     <button
                         onclick="previousHole()"
                         ${
-                            currentHole === 1
+                            currentHole === 1 || !canNavigateAway()
                                 ? "disabled"
                                 : ""
                         }>
@@ -637,7 +767,7 @@ function render() {
                         onclick="nextHole()"
                         ${
                             currentHole ===
-                            courseData.holes.length
+                            courseData.holes.length || !canNavigateAway()
                                 ? "disabled"
                                 : ""
                         }>
@@ -648,14 +778,14 @@ function render() {
 
                 <button
                     onclick="saveCurrentHole()"
-                    ${isCurrentHoleComplete() && (!isCurrentHoleSaved() || dirtyHoles[currentHole - 1]) && !submitted ? "" : "disabled"}
+                    ${isCurrentHoleComplete() && (!isCurrentHoleSaved() || hasUnsavedChanges()) && !submitted ? "" : "disabled"}
                     style="
                         width: 100%;
                         margin-top: 10px;
                         padding: 12px;
                         border: none;
                         border-radius: 10px;
-                        background: ${isCurrentHoleComplete() && (!isCurrentHoleSaved() || dirtyHoles[currentHole - 1]) ? "#065f46" : "#9ca3af"};
+                        background: ${isCurrentHoleComplete() && (!isCurrentHoleSaved() || hasUnsavedChanges()) ? "#065f46" : "#9ca3af"};
                         color: white;
                         font-size: 1rem;
                         font-weight: bold;
@@ -792,6 +922,10 @@ function render() {
         </div>
     `;
 
+    if (fullScorecardOpen) {
+        html += buildFullScorecard();
+    }
+
     document.getElementById("root").innerHTML =
         html;
 }
@@ -896,6 +1030,12 @@ function restoreScores() {
             savedData.savedHoles.slice(0, 18).forEach((saved, index) => {
                 savedHoles[index] = Boolean(saved);
             });
+        } else {
+            for (let index = 0; index < 18; index++) {
+                savedHoles[index] = players.every(player =>
+                    confirmed[player.playerid][index]
+                );
+            }
         }
 
         if (Array.isArray(savedData.dirtyHoles)) {
