@@ -56,9 +56,9 @@ function ensureConfirmationStyles() {
         .scorecard-overlay-header h2 { margin: 0; font-size: 1.1rem; }
         .scorecard-close-btn { padding: 8px 12px; border: none; border-radius: 8px; background: #444; color: white; font-weight: 700; }
         .full-scorecard-wrap { overflow-x: auto; }
-        .full-scorecard { border-collapse: collapse; min-width: 900px; width: 100%; font-family: Consolas, "Courier New", monospace; font-size: 0.82rem; font-weight: 700; text-align: center; }
-        .full-scorecard th, .full-scorecard td { border: 1px solid #777; padding: 5px 4px; white-space: nowrap; }
-        .full-scorecard th:first-child, .full-scorecard td:first-child { position: sticky; left: 0; background: white; text-align: left; min-width: 44px; }
+        .full-scorecard { border-collapse: collapse; table-layout: fixed; width: 988px; min-width: 988px; font-family: Consolas, "Courier New", monospace; font-size: 1rem; font-weight: 700; text-align: center; }
+        .full-scorecard th, .full-scorecard td { box-sizing: border-box; width: 42px; min-width: 42px; max-width: 42px; border: 1px solid #777; padding: 6px 2px; white-space: nowrap; font-size: 1rem; }
+        .full-scorecard th:first-child, .full-scorecard td:first-child { position: sticky; left: 0; z-index: 1; background: white; text-align: left; width: 64px; min-width: 64px; max-width: 64px; }
         .full-scorecard .subtotal { background: #eeeeee; }
         .rotate-note { margin: 4px 0 8px; font-size: 0.8rem; }
 
@@ -250,8 +250,20 @@ function getSaveButtonText() {
         : "Save Hole 18";
 }
 
+function hasPendingSave() {
+    return hasUnsavedChanges() ||
+        (isCurrentHoleComplete() && !isCurrentHoleSaved());
+}
+
 function canNavigateAway() {
-    return !hasUnsavedChanges();
+    return !hasPendingSave();
+}
+
+function isRoundFullySaved() {
+    return savedHoles.length === courseData.holes.length &&
+        savedHoles.every(Boolean) &&
+        dirtyHoles.every(isDirty => !isDirty) &&
+        isScorecardComplete();
 }
 
 function getPlayerInitials(displayName) {
@@ -319,7 +331,7 @@ function buildProgressScorecard() {
 
     progressHtml += `
             </div>
-            ${isScorecardComplete() ? `
+            ${isRoundFullySaved() ? `
                 <div class="progress-actions">
                     <button class="full-scorecard-btn" onclick="openFullScorecard()">
                         View Full Scorecard
@@ -387,7 +399,7 @@ function buildFullScorecard() {
 }
 
 async function openFullScorecard() {
-    if (!isScorecardComplete()) return;
+    if (!isRoundFullySaved()) return;
 
     fullScorecardOpen = true;
     render();
@@ -632,9 +644,9 @@ function buildScoreSummary() {
 async function submitScores() {
     if (submitting || submitted) return;
 
-    if (!isScorecardComplete()) {
+    if (!isRoundFullySaved()) {
         verified = false;
-        submissionMessage = buildMissingScoreMessage();
+        submissionMessage = "Every hole must be saved before submission.";
         goToFirstMissingHole();
         render();
         return;
@@ -871,7 +883,7 @@ function render() {
             `;
         }
 
-        if (isScorecardComplete()) {
+        if (isRoundFullySaved()) {
             html += `
                 <label>
                     <input
