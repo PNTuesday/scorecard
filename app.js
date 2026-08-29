@@ -15,6 +15,9 @@ const scores = {};
 const confirmed = {};
 const savedHoles = Array(18).fill(false);
 const dirtyHoles = Array(18).fill(false);
+const withdrawn = {};
+const withdrawalMode = {};
+const withdrawalBackup = {};
 
 const STORAGE_PREFIX = "golf-scorecard:";
 
@@ -49,6 +52,12 @@ function ensureConfirmationStyles() {
         .player-score-row .player-name { margin: 0; padding: 0; font-size: 1.08rem; line-height: 1; font-weight: 700; }
         .player-score-row .score-selector { margin: 0; flex: 0 0 auto; }
         .compact-player-card .player-details { margin: 0; padding: 0; line-height: 1; }
+        .player-name-out { color: #991b1b; }
+        .player-details-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .out-toggle { font-size: 0.78rem; font-weight: 700; color: #991b1b; white-space: nowrap; }
+        .out-toggle input { margin-right: 4px; }
+        .player-out-card { background: #f3f4f6; }
+        .withdrawn-row td { text-align: left; font-family: inherit; font-size: 1rem; font-weight: 700; }
         .progress-actions { margin-top: 8px; }
         .full-scorecard-btn { width: 100%; padding: 10px; border: none; border-radius: 9px; background: #1f4f3d; color: white; font-weight: 700; }
         .scorecard-overlay { position: fixed; inset: 0; z-index: 9999; background: white; color: #111827; padding: 10px; overflow: auto; }
@@ -158,6 +167,8 @@ function initializeScores() {
             courseData.holes.map(hole => hole.par);
         confirmed[player.playerid] =
             courseData.holes.map(() => false);
+        withdrawn[player.playerid] = false;
+        withdrawalMode[player.playerid] = "";
     });
 }
 
@@ -167,6 +178,7 @@ function changeScore(playerIndex, delta) {
 
     const player = players[playerIndex];
     const playerId = player.playerid;
+    if (withdrawn[playerId]) return;
     const currentValue = scores[playerId][currentHole - 1];
     const newValue = Math.min(8, Math.max(0, currentValue + delta));
 
@@ -192,6 +204,7 @@ function confirmCurrentScore(playerIndex) {
 
     const player = players[playerIndex];
     const playerId = player.playerid;
+    if (withdrawn[playerId]) return;
     const holeIndex = currentHole - 1;
 
     if (savedHoles[holeIndex] && confirmed[playerId][holeIndex]) {
@@ -203,6 +216,63 @@ function confirmCurrentScore(playerIndex) {
     submissionMessage = "";
     saveScores();
     render();
+}
+
+function hasCompletedFrontNine(playerId) {
+    return savedHoles.slice(0, 9).every(Boolean) &&
+        confirmed[playerId].slice(0, 9).every(Boolean);
+}
+
+function getBlindName(playerIndex) {
+    return `Blind-${String.fromCharCode(65 + playerIndex)}`;
+}
+
+function setPlayerOut(playerIndex, makeOut) {
+    if (submitted) return;
+    const player = players[playerIndex];
+    const playerId = player.playerid;
+
+    if (makeOut) {
+        if (!window.confirm(`Mark ${player.displayname} OUT for the remainder of the round?`)) {
+            render();
+            return;
+        }
+        withdrawalBackup[playerId] = {
+            scores: [...scores[playerId]],
+            confirmed: [...confirmed[playerId]]
+        };
+        const afterNine = hasCompletedFrontNine(playerId);
+        const startIndex = afterNine ? 9 : 0;
+        withdrawn[playerId] = true;
+        withdrawalMode[playerId] = afterNine ? "afterNine" : "beforeNine";
+        for (let index = startIndex; index < 18; index++) {
+            scores[playerId][index] = 0;
+            confirmed[playerId][index] = true;
+        }
+    } else {
+        if (!window.confirm(`Restore ${player.displayname} to active scoring?`)) {
+            render();
+            return;
+        }
+        const backup = withdrawalBackup[playerId];
+        if (backup) {
+            scores[playerId] = [...backup.scores];
+            confirmed[playerId] = [...backup.confirmed];
+        }
+        withdrawn[playerId] = false;
+        withdrawalMode[playerId] = "";
+    }
+
+    dirtyHoles[currentHole - 1] = true;
+    verified = false;
+    submissionMessage = "";
+    saveScores();
+    render();
+}
+
+function isWithdrawnHole(playerId, holeIndex) {
+    if (!withdrawn[playerId]) return false;
+    return withdrawalMode[playerId] === "beforeNine" || holeIndex >= 9;
 }
 
 function getMissingScores() {
@@ -318,12 +388,13 @@ function buildProgressScorecard() {
         const playerId = player.playerid;
 
         progressHtml += `
-            <span class="progress-name">${escapeHtml(getPlayerInitials(player.displayname))}</span>
+            <span class="progress-name">${escapeHtml(getPlayerInitials(player.displayname))}${withdrawn[playerId] ? "*" : ""}</span>
             ${holeNumbers.map(hole => {
                 const index = hole - 1;
-                return `<span>${confirmed[playerId][index]
-                    ? scores[playerId][index]
-                    : "-"}</span>`;
+                const value = isWithdrawnHole(playerId, index)
+                    ? "X"
+                    : confirmed[playerId][index] ? scores[playerId][index] : "-";
+                return `<span>${value}</span>`;
             }).join("")}
             <span class="progress-total">${confirmedNineTotal(playerId, startIndex)}</span>
         `;
@@ -345,6 +416,7 @@ function buildProgressScorecard() {
 }
 
 function fullRoundTotal(playerId) {
+    if (withdrawalMode[playerId] === "beforeNine") return 0;
     return scores[playerId].reduce((sum, value) => sum + value, 0);
 }
 
@@ -376,16 +448,19 @@ function buildFullScorecard() {
 
     players.forEach(player => {
         const playerId = player.playerid;
+        if (withdrawalMode[playerId] === "beforeNine") {
+            html += `<tr class="withdrawn-row"><td>${escapeHtml(getPlayerInitials(player.displayname))}</td><td colspan="21">Player Withdrawn</td></tr>`;
+            return;
+        }
         html += `
             <tr>
-                <td>${escapeHtml(getPlayerInitials(player.displayname))}</td>
+                <td>${escapeHtml(getPlayerInitials(player.displayname))}${withdrawn[playerId] ? " (OUT)" : ""}</td>
                 ${frontHoles.map(hole => `<td>${scores[playerId][hole - 1]}</td>`).join("")}
                 <td class="subtotal">${confirmedNineTotal(playerId, 0)}</td>
-                ${backHoles.map(hole => `<td>${scores[playerId][hole - 1]}</td>`).join("")}
-                <td class="subtotal">${confirmedNineTotal(playerId, 9)}</td>
+                ${backHoles.map(hole => `<td>${isWithdrawnHole(playerId, hole - 1) ? "X" : scores[playerId][hole - 1]}</td>`).join("")}
+                <td class="subtotal">${withdrawn[playerId] ? 0 : confirmedNineTotal(playerId, 9)}</td>
                 <td class="subtotal">${fullRoundTotal(playerId)}</td>
-            </tr>
-        `;
+            </tr>`;
     });
 
     html += `
@@ -580,7 +655,10 @@ function buildScoreData() {
     return players.map(player => {
         const playerScores = {
             playerid: player.playerid,
-            displayname: player.displayname
+            displayname: player.displayname,
+            withdrawn: Boolean(withdrawn[player.playerid]),
+            withdrawalmode: withdrawalMode[player.playerid] || "",
+            blindname: withdrawn[player.playerid] ? getBlindName(players.indexOf(player)) : ""
         };
 
         scores[player.playerid].forEach(
@@ -818,6 +896,7 @@ function render() {
             const isConfirmed =
                 confirmed[player.playerid][currentHole - 1];
 
+            const isOut = withdrawn[player.playerid];
             const scoreClass =
                 score === 0
                     ? "score-zero"
@@ -826,36 +905,45 @@ function render() {
                         : "score-unconfirmed";
 
             html += `
-                <div class="score-card compact-player-card">
+                <div class="score-card compact-player-card ${isOut ? "player-out-card" : ""}">
                     <div class="player-score-row">
-                        <div class="player-name">
-                            ${escapeHtml(player.displayname)}
+                        <div class="player-name ${isOut ? "player-name-out" : ""}">
+                            ${escapeHtml(player.displayname)}${isOut ? " (OUT)" : ""}
                         </div>
                         <div class="score-selector">
                             <button
                                 class="arrow-btn"
                                 onclick="changeScore(${playerIndex}, -1)"
-                                ${submitted ? "disabled" : ""}>
+                                ${submitted || isOut ? "disabled" : ""}>
                                 ◀
                             </button>
                             <button
                                 class="score-display ${scoreClass}"
                                 onclick="confirmCurrentScore(${playerIndex})"
-                                ${submitted ? "disabled" : ""}
+                                ${submitted || isOut ? "disabled" : ""}
                                 aria-label="Confirm score ${score} for ${escapeHtml(player.displayname)}">
                                 ${score}
                             </button>
                             <button
                                 class="arrow-btn"
                                 onclick="changeScore(${playerIndex}, 1)"
-                                ${submitted ? "disabled" : ""}>
+                                ${submitted || isOut ? "disabled" : ""}>
                                 ▶
                             </button>
                         </div>
                     </div>
-                    <div class="player-details">
-                        ${escapeHtml(player.tee)} Tee |
-                        HCP ${escapeHtml(player.hcp)}
+                    <div class="player-details-row">
+                        <div class="player-details">
+                            ${escapeHtml(player.tee)} Tee |
+                            HCP ${escapeHtml(player.hcp)}
+                        </div>
+                        <label class="out-toggle">
+                            <input type="checkbox"
+                                onchange="setPlayerOut(${playerIndex}, this.checked)"
+                                ${isOut ? "checked" : ""}
+                                ${submitted ? "disabled" : ""}>
+                            OUT
+                        </label>
                     </div>
                 </div>
             `;
@@ -1059,27 +1147,19 @@ function restoreScores() {
             });
         }
 
-        if (savedData.withdrawn) {
-            players.forEach(player => {
-                withdrawn[player.playerid] = Boolean(savedData.withdrawn[player.playerid]);
-            });
-        }
-
-        if (savedData.withdrawalMode) {
-            players.forEach(player => {
-                withdrawalMode[player.playerid] = savedData.withdrawalMode[player.playerid] || "";
-            });
-        }
-
-        if (savedData.withdrawalBackup) {
-            Object.keys(savedData.withdrawalBackup).forEach(playerId => {
-                const backup = savedData.withdrawalBackup[playerId];
-                withdrawalBackup[playerId] = {
-                    scores: Array.isArray(backup.scores) ? [...backup.scores] : [],
-                    confirmed: Array.isArray(backup.confirmed) ? [...backup.confirmed] : []
-                };
-            });
-        }
+        if (savedData.withdrawn) players.forEach(player => {
+            withdrawn[player.playerid] = Boolean(savedData.withdrawn[player.playerid]);
+        });
+        if (savedData.withdrawalMode) players.forEach(player => {
+            withdrawalMode[player.playerid] = savedData.withdrawalMode[player.playerid] || "";
+        });
+        if (savedData.withdrawalBackup) Object.keys(savedData.withdrawalBackup).forEach(playerId => {
+            const backup = savedData.withdrawalBackup[playerId];
+            withdrawalBackup[playerId] = {
+                scores: Array.isArray(backup.scores) ? [...backup.scores] : [],
+                confirmed: Array.isArray(backup.confirmed) ? [...backup.confirmed] : []
+            };
+        });
 
         submissionMessage =
             "Saved scorecard restored.";
