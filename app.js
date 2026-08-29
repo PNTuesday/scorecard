@@ -971,7 +971,10 @@ function saveScores() {
         scores,
         confirmed,
         savedHoles,
-        dirtyHoles
+        dirtyHoles,
+        withdrawn,
+        withdrawalMode,
+        withdrawalBackup
     };
 
     localStorage.setItem(
@@ -1053,6 +1056,28 @@ function restoreScores() {
         if (Array.isArray(savedData.dirtyHoles)) {
             savedData.dirtyHoles.slice(0, 18).forEach((dirty, index) => {
                 dirtyHoles[index] = Boolean(dirty);
+            });
+        }
+
+        if (savedData.withdrawn) {
+            players.forEach(player => {
+                withdrawn[player.playerid] = Boolean(savedData.withdrawn[player.playerid]);
+            });
+        }
+
+        if (savedData.withdrawalMode) {
+            players.forEach(player => {
+                withdrawalMode[player.playerid] = savedData.withdrawalMode[player.playerid] || "";
+            });
+        }
+
+        if (savedData.withdrawalBackup) {
+            Object.keys(savedData.withdrawalBackup).forEach(playerId => {
+                const backup = savedData.withdrawalBackup[playerId];
+                withdrawalBackup[playerId] = {
+                    scores: Array.isArray(backup.scores) ? [...backup.scores] : [],
+                    confirmed: Array.isArray(backup.confirmed) ? [...backup.confirmed] : []
+                };
             });
         }
 
