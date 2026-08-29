@@ -18,6 +18,7 @@ const dirtyHoles = Array(18).fill(false);
 const withdrawn = {};
 const withdrawalMode = {};
 const withdrawalBackup = {};
+const savedScoreSnapshots = {};
 
 const STORAGE_PREFIX = "golf-scorecard:";
 
@@ -173,6 +174,35 @@ function initializeScores() {
 }
 
 
+function getHoleScoreSnapshot(holeIndex) {
+    return players.map(player =>
+        Number(scores[player.playerid][holeIndex])
+    );
+}
+
+function rememberSavedHole(holeIndex) {
+    savedScoreSnapshots[holeIndex] = getHoleScoreSnapshot(holeIndex);
+}
+
+function holeScoresDifferFromSaved(holeIndex) {
+    const savedSnapshot = savedScoreSnapshots[holeIndex];
+
+    if (!Array.isArray(savedSnapshot)) {
+        return savedHoles[holeIndex];
+    }
+
+    const currentSnapshot = getHoleScoreSnapshot(holeIndex);
+
+    return currentSnapshot.some((score, index) =>
+        score !== Number(savedSnapshot[index])
+    );
+}
+
+function refreshHoleDirtyState(holeIndex) {
+    dirtyHoles[holeIndex] =
+        savedHoles[holeIndex] && holeScoresDifferFromSaved(holeIndex);
+}
+
 function changeScore(playerIndex, delta) {
     if (submitted) return;
 
@@ -187,8 +217,8 @@ function changeScore(playerIndex, delta) {
     scores[playerId][currentHole - 1] = newValue;
 
     if (savedHoles[currentHole - 1]) {
-        dirtyHoles[currentHole - 1] = true;
         confirmed[playerId][currentHole - 1] = false;
+        refreshHoleDirtyState(currentHole - 1);
     } else {
         confirmed[playerId][currentHole - 1] = true;
     }
@@ -254,16 +284,21 @@ function setPlayerOut(playerIndex, makeOut) {
             render();
             return;
         }
-        const backup = withdrawalBackup[playerId];
-        if (backup) {
-            scores[playerId] = [...backup.scores];
-            confirmed[playerId] = [...backup.confirmed];
-        }
         withdrawn[playerId] = false;
         withdrawalMode[playerId] = "";
+
+        for (let index = 0; index < 18; index++) {
+            if (savedHoles[index]) {
+                confirmed[playerId][index] = true;
+            }
+        }
     }
 
-    dirtyHoles[currentHole - 1] = true;
+    if (savedHoles[currentHole - 1]) {
+        refreshHoleDirtyState(currentHole - 1);
+    } else {
+        dirtyHoles[currentHole - 1] = true;
+    }
     verified = false;
     submissionMessage = "";
     saveScores();
@@ -578,6 +613,7 @@ function saveCurrentHole() {
     const isCorrection = hasUnsavedChanges();
 
     savedHoles[savedHole - 1] = true;
+    rememberSavedHole(savedHole - 1);
     dirtyHoles[savedHole - 1] = false;
     submissionMessage = `Hole ${savedHole} saved.`;
     saveScores();
@@ -1062,7 +1098,8 @@ function saveScores() {
         dirtyHoles,
         withdrawn,
         withdrawalMode,
-        withdrawalBackup
+        withdrawalBackup,
+        savedScoreSnapshots
     };
 
     localStorage.setItem(
@@ -1160,6 +1197,21 @@ function restoreScores() {
                 confirmed: Array.isArray(backup.confirmed) ? [...backup.confirmed] : []
             };
         });
+
+        if (savedData.savedScoreSnapshots) {
+            Object.keys(savedData.savedScoreSnapshots).forEach(holeIndex => {
+                const snapshot = savedData.savedScoreSnapshots[holeIndex];
+                if (Array.isArray(snapshot)) {
+                    savedScoreSnapshots[holeIndex] = snapshot.map(Number);
+                }
+            });
+        }
+
+        for (let index = 0; index < 18; index++) {
+            if (savedHoles[index] && !Array.isArray(savedScoreSnapshots[index])) {
+                rememberSavedHole(index);
+            }
+        }
 
         submissionMessage =
             "Saved scorecard restored.";
