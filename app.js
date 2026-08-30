@@ -71,6 +71,19 @@ function ensureConfirmationStyles() {
         .full-scorecard th:first-child, .full-scorecard td:first-child { position: sticky; left: 0; z-index: 1; background: white; text-align: left; width: 64px; min-width: 64px; max-width: 64px; }
         .full-scorecard .subtotal { background: #eeeeee; }
         .rotate-note { margin: 4px 0 8px; font-size: 0.8rem; }
+        .hole-number-large {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1;
+            text-align: center;
+            color: #111827;
+            margin: 8px 0 4px;
+        }
+
+        .hole-details {
+            text-align: center;
+            font-weight: 700;
+        S}
 
     `;
     document.head.appendChild(style);
@@ -853,17 +866,8 @@ function render() {
                 </h1>
 
                 <p>
-                    <strong>
-                        ${escapeHtml(courseName)}
-                    </strong>
-
-                    ${
-                        formattedDate
-                            ? ` | ${escapeHtml(
-                                formattedDate
-                            )}`
-                            : ""
-                    }
+                    <strong>Date:</strong>
+                    ${formattedDate ? escapeHtml(formattedDate) : ""}
                 </p>
 
                 <p>
@@ -871,8 +875,11 @@ function render() {
                     ${escapeHtml(roundData.roundid)}
                 </p>
 
-                <div class="hole-info">
-                    Hole ${holeData.hole} |
+                <div class="hole-number-large">
+                    ${holeData.hole}
+                </div>
+
+                <div class="hole-info hole-details">
                     Par ${holeData.par} |
                     HCP ${holeData.hcp}
                 </div>
