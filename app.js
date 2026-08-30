@@ -71,8 +71,6 @@ function ensureConfirmationStyles() {
         .full-scorecard th:first-child, .full-scorecard td:first-child { position: sticky; left: 0; z-index: 1; background: white; text-align: left; width: 64px; min-width: 64px; max-width: 64px; }
         .full-scorecard .subtotal { background: #eeeeee; }
         .rotate-note { margin: 4px 0 8px; font-size: 0.8rem; }
-        .hole-number-large { font-size: 3.5rem; font-weight: 800; line-height: 1; text-align: center; color: #111827; margin: 8px 0 4px; }
-        .hole-details { text-align: center; font-weight: 700; }
 
     `;
     document.head.appendChild(style);
