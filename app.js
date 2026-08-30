@@ -72,18 +72,30 @@ function ensureConfirmationStyles() {
         .full-scorecard .subtotal { background: #eeeeee; }
         .rotate-note { margin: 4px 0 8px; font-size: 0.8rem; }
         .hole-number-large {
-            font-size: 3.5rem;
+            font-size: 2.5rem;
             font-weight: 800;
             line-height: 1;
             text-align: center;
             color: #111827;
-            margin: 8px 0 4px;
+            margin: 0;
         }
 
         .hole-details {
             text-align: center;
             font-weight: 700;
-        S}
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .hole-summary {
+            text-align: center;
+            min-width: 110px;
+        }
 
     `;
     document.head.appendChild(style);
@@ -862,8 +874,11 @@ function render() {
 
                 <h1>
                     Group ${escapeHtml(roundData.group)}
-                    Scorecard
                 </h1>
+
+                <div class="header-top">
+
+                <div>
 
                 <p>
                     <strong>Date:</strong>
@@ -875,14 +890,21 @@ function render() {
                     ${escapeHtml(roundData.roundid)}
                 </p>
 
-                <div class="hole-number-large">
-                    ${holeData.hole}
-                </div>
+            </div>
 
-                <div class="hole-info hole-details">
-                    Par ${holeData.par} |
-                    HCP ${holeData.hcp}
-                </div>
+    <div class="hole-summary">
+
+        <div class="hole-number-large">
+            ${holeData.hole}
+        </div>
+
+        <div class="hole-details">
+            Par ${holeData.par} | HCP ${holeData.hcp}
+        </div>
+
+    </div>
+
+</div>
 
                 <div class="nav-buttons">
 
