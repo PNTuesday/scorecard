@@ -5,16 +5,16 @@
   "course": "The Neck",
   "players": [
     {
-      "playerid": "P0016",
-      "displayname": "Jerry C.",
-      "hcp": 6,
-      "tee": "Bhy"
-    },
-    {
       "playerid": "P0012",
       "displayname": "Gene C.",
       "hcp": 7,
       "tee": "Why"
+    },
+    {
+      "playerid": "P0016",
+      "displayname": "Jerry C.",
+      "hcp": 6,
+      "tee": "Bhy"
     },
     {
       "playerid": "P0050",
