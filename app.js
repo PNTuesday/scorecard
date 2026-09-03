@@ -77,7 +77,7 @@ function ensureConfirmationStyles() {
             line-height: 1;
             text-align: center;
             color: #111827;
-            margin: 0;
+            margin: -4px 0 0 0;
         }
 
         .hole-details {
@@ -95,6 +95,7 @@ function ensureConfirmationStyles() {
         .hole-summary {
             text-align: center;
             min-width: 110px;
+            margin-top: -8px;
         }
 
     `;
