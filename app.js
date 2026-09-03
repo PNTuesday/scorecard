@@ -95,7 +95,7 @@ function ensureConfirmationStyles() {
         .hole-summary {
             text-align: center;
             min-width: 110px;
-            margin-top: -8px;
+            margin-top: -12px;
         }
 
     `;
