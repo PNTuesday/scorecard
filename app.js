@@ -933,7 +933,7 @@ function render() {
                 </div>
 
                 <button
-                    onclick="saveCurrentHole()"
+                    onclick="${verified ? 'submitScores()' : 'saveCurrentHole()'}"
                     ${isCurrentHoleComplete() && (!isCurrentHoleSaved() || hasUnsavedChanges()) && !submitted ? "" : "disabled"}
                     style="
                         width: 100%;
@@ -941,12 +941,21 @@ function render() {
                         padding: 12px;
                         border: none;
                         border-radius: 10px;
-                        background: ${isCurrentHoleComplete() && (!isCurrentHoleSaved() || hasUnsavedChanges()) ? "#065f46" : "#9ca3af"};
+                        background: ${verified
+                            ? "#065f46"
+                            : (
+                                isCurrentHoleComplete() &&
+                                (!isCurrentHoleSaved() || hasUnsavedChanges())
+                                    ? "#065f46"
+                                    : "#9ca3af"
+                            )};
                         color: white;
                         font-size: 1rem;
                         font-weight: bold;
                     ">
-                    ${getSaveButtonText()}
+                   ${verified
+                        ? "Submit Verified Scores"
+                        : getSaveButtonText()}
                 </button>
             </div>
     `;
@@ -1048,21 +1057,6 @@ function render() {
                 </label>
             `;
 
-            if (verified) {
-                html += `
-                    <button
-                        onclick="submitScores()"
-                        ${submitting ? "disabled" : ""}
-                        style="
-                            width: 100%; margin-top: 12px; padding: 14px;
-                            border: none; border-radius: 10px;
-                            background: #065f46; color: white;
-                            font-size: 1rem; font-weight: bold;
-                        ">
-                        ${submitting ? "Submitting..." : "Submit Verified Scores"}
-                    </button>
-                `;
-            }
         }
     }
 
