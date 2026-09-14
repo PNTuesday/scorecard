@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "478ZT7",
+  "group": "E",
+  "date": "2026-09-15",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0061",
+      "displayname": "John T.",
+      "hcp": 7,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0013",
+      "displayname": "Kevin C.",
+      "hcp": 10,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0009",
+      "displayname": "Bob B.",
+      "hcp": 11,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0042",
+      "displayname": "Ted M.",
+      "hcp": 13,
+      "tee": "Bhy"
+    }
+  ]
+}

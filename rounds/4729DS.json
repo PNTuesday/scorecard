@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "4729DS",
+  "group": "B",
+  "date": "2026-09-15",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0016",
+      "displayname": "Jerry C.",
+      "hcp": 5,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0054",
+      "displayname": "Robert R.",
+      "hcp": 9,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0004",
+      "displayname": "Larry A.",
+      "hcp": 10,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0067",
+      "displayname": "Roger Y.",
+      "hcp": 16,
+      "tee": "Bhy"
+    }
+  ]
+}
