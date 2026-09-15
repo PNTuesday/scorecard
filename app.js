@@ -935,36 +935,41 @@ function render() {
 
                 <button
                     onclick="${verified ? 'submitScores()' : 'saveCurrentHole()'}"
-                    ${verified
-                        ? (submitting || submitted ? "disabled" : "")
-                        : (
-                            isCurrentHoleComplete() &&
-                            (!isCurrentHoleSaved() || hasUnsavedChanges()) &&
-                            !submitted
-                                ? ""
-                                : "disabled"
-                          )}
+                    ${submitted
+                        ? "disabled"
+                        : verified
+                            ? (submitting ? "disabled" : "")
+                            : (
+                                isCurrentHoleComplete() &&
+                                (!isCurrentHoleSaved() || hasUnsavedChanges())
+                                    ? ""
+                                    : "disabled"
+                              )}
                     style="
                         width: 100%;
                         margin-top: 10px;
                         padding: 12px;
                         border: none;
                         border-radius: 10px;
-                        background: ${verified
-                            ? "#065f46"
-                            : (
-                                isCurrentHoleComplete() &&
-                                (!isCurrentHoleSaved() || hasUnsavedChanges())
-                                    ? "#065f46"
-                                    : "#9ca3af"
-                            )};
+                        background: ${submitted
+                            ? "#064e3b"
+                            : verified
+                                ? "#065f46"
+                                : (
+                                    isCurrentHoleComplete() &&
+                                    (!isCurrentHoleSaved() || hasUnsavedChanges())
+                                        ? "#065f46"
+                                        : "#9ca3af"
+                                  )};
                         color: white;
                         font-size: 1rem;
                         font-weight: bold;
                     ">
-                   ${verified
-                        ? (submitting ? "Submitting..." : "Submit Verified Scores")
-                        : getSaveButtonText()}
+                   ${submitted
+                        ? "Scores Submitted"
+                        : verified
+                            ? (submitting ? "Submitting..." : "Submit Verified Scores")
+                            : getSaveButtonText()}
                 </button>
             </div>
     `;
