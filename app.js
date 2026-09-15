@@ -782,6 +782,9 @@ function buildScoreSummary() {
 }
 
 async function submitScores() {
+
+    console.log("submitScores called");
+
     if (submitting || submitted) return;
 
     if (!isRoundFullySaved()) {
@@ -934,7 +937,15 @@ function render() {
 
                 <button
                     onclick="${verified ? 'submitScores()' : 'saveCurrentHole()'}"
-                    ${isCurrentHoleComplete() && (!isCurrentHoleSaved() || hasUnsavedChanges()) && !submitted ? "" : "disabled"}
+                    ${verified
+                        ? (submitting || submitted ? "disabled" : "")
+                        : (
+                            isCurrentHoleComplete() &&
+                            (!isCurrentHoleSaved() || hasUnsavedChanges()) &&
+                            !submitted
+                                ? ""
+                                : "disabled"
+                          )}
                     style="
                         width: 100%;
                         margin-top: 10px;
@@ -954,7 +965,7 @@ function render() {
                         font-weight: bold;
                     ">
                    ${verified
-                        ? "Submit Verified Scores"
+                        ? (submitting ? "Submitting..." : "Submit Verified Scores")
                         : getSaveButtonText()}
                 </button>
             </div>
