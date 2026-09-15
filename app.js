@@ -783,8 +783,6 @@ function buildScoreSummary() {
 
 async function submitScores() {
 
-    console.log("submitScores called");
-
     if (submitting || submitted) return;
 
     if (!isRoundFullySaved()) {
