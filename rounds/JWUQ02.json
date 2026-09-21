@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "JWUQ02",
+  "group": "D",
+  "date": "2026-09-22",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0023",
+      "displayname": "Jan G.",
+      "hcp": 6,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0050",
+      "displayname": "Scott P.",
+      "hcp": 8,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0041",
+      "displayname": "John M.",
+      "hcp": 11,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0040",
+      "displayname": "Paul M.",
+      "hcp": 17,
+      "tee": "Why"
+    }
+  ]
+}

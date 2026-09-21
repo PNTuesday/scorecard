@@ -1,7 +1,7 @@
 ﻿{
-  "roundid": "4700KN",
+  "roundid": "JWNZKN",
   "group": "A",
-  "date": "2026-09-15",
+  "date": "2026-09-22",
   "course": "The Neck",
   "players": [
     {
@@ -11,21 +11,21 @@
       "tee": "Why"
     },
     {
+      "playerid": "P0002",
+      "displayname": "Thomas A.",
+      "hcp": 9,
+      "tee": "Why"
+    },
+    {
       "playerid": "P0072",
       "displayname": "Tony Y.",
       "hcp": 10,
       "tee": "Why"
     },
     {
-      "playerid": "P0031",
-      "displayname": "Bob J.",
-      "hcp": 9,
-      "tee": "Bhy"
-    },
-    {
-      "playerid": "P0040",
-      "displayname": "Paul M.",
-      "hcp": 17,
+      "playerid": "P0008",
+      "displayname": "Budd B.",
+      "hcp": 15,
       "tee": "Why"
     }
   ]
