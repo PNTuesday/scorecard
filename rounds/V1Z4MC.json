@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "V1Z4MC",
+  "group": "F",
+  "date": "2026-10-13",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0036",
+      "displayname": "Jack L.",
+      "hcp": 6,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0053",
+      "displayname": "Matthew R.",
+      "hcp": 9,
+      "tee": "White"
+    },
+    {
+      "playerid": "P0004",
+      "displayname": "Larry A.",
+      "hcp": 12,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0040",
+      "displayname": "Paul M.",
+      "hcp": 17,
+      "tee": "Why"
+    }
+  ]
+}

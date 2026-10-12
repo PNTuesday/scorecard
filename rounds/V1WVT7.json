@@ -1,7 +1,7 @@
 ﻿{
-  "roundid": "JWQ8DS",
-  "group": "B",
-  "date": "2026-09-22",
+  "roundid": "V1WVT7",
+  "group": "E",
+  "date": "2026-10-13",
   "course": "The Neck",
   "players": [
     {
@@ -11,15 +11,15 @@
       "tee": "White"
     },
     {
-      "playerid": "P0054",
-      "displayname": "Robert R.",
-      "hcp": 9,
-      "tee": "Bhy"
+      "playerid": "P0002",
+      "displayname": "Thomas A.",
+      "hcp": 11,
+      "tee": "Why"
     },
     {
-      "playerid": "P0031",
-      "displayname": "Bob J.",
-      "hcp": 10,
+      "playerid": "P0041",
+      "displayname": "John M.",
+      "hcp": 12,
       "tee": "Bhy"
     },
     {
