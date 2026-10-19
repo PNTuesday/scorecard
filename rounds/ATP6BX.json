@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "ATP6BX",
+  "group": "1C",
+  "date": "2026-10-20",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0036",
+      "displayname": "Jack L.",
+      "hcp": 5,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0072",
+      "displayname": "Tony Y.",
+      "hcp": 9,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0001",
+      "displayname": "Robert A.",
+      "hcp": 7,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0005",
+      "displayname": "Robert A.",
+      "hcp": 7,
+      "tee": "Why"
+    }
+  ]
+}

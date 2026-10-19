@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "AVTHUN",
+  "group": "2A",
+  "date": "2026-10-20",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0021",
+      "displayname": "Jim E.",
+      "hcp": 9,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0066",
+      "displayname": "Kevin W.",
+      "hcp": 11,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0040",
+      "displayname": "Paul M.",
+      "hcp": 14,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0067",
+      "displayname": "Roger Y.",
+      "hcp": 15,
+      "tee": "Bhy"
+    }
+  ]
+}

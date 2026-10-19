@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "ATKOPN",
+  "group": "1A",
+  "date": "2026-10-20",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0045",
+      "displayname": "Daniel M.",
+      "hcp": 5,
+      "tee": "White"
+    },
+    {
+      "playerid": "P0050",
+      "displayname": "Scott P.",
+      "hcp": 8,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0022",
+      "displayname": "Dick F.",
+      "hcp": 4,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0060",
+      "displayname": "Harold S.",
+      "hcp": 8,
+      "tee": "Why"
+    }
+  ]
+}
