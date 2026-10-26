@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "QH6L02",
+  "group": "D",
+  "date": "2026-10-27",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0023",
+      "displayname": "Jan G.",
+      "hcp": 6,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0072",
+      "displayname": "Tony Y.",
+      "hcp": 11,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0041",
+      "displayname": "John M.",
+      "hcp": 13,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0008",
+      "displayname": "Budd B.",
+      "hcp": 16,
+      "tee": "Why"
+    }
+  ]
+}
