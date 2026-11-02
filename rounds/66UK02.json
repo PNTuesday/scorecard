@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "66UK02",
+  "group": "D",
+  "date": "2026-11-03",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0049",
+      "displayname": "John P.",
+      "hcp": 6,
+      "tee": "White"
+    },
+    {
+      "playerid": "P0072",
+      "displayname": "Tony Y.",
+      "hcp": 9,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0018",
+      "displayname": "Warren D.",
+      "hcp": 12,
+      "tee": "Green"
+    },
+    {
+      "playerid": "P0007",
+      "displayname": "John B.",
+      "hcp": 15,
+      "tee": "Green"
+    }
+  ]
+}

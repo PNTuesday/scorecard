@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "66SB6X",
+  "group": "C",
+  "date": "2026-11-03",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0016",
+      "displayname": "Jerry C.",
+      "hcp": 6,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0055",
+      "displayname": "Jim S.",
+      "hcp": 8,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0013",
+      "displayname": "Kevin C.",
+      "hcp": 11,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0043",
+      "displayname": "Grady M.",
+      "hcp": 15,
+      "tee": "Green"
+    }
+  ]
+}
