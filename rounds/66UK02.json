@@ -17,15 +17,15 @@
       "tee": "Why"
     },
     {
+      "playerid": "P0004",
+      "displayname": "Larry A.",
+      "hcp": 10,
+      "tee": "Bhy"
+    },
+    {
       "playerid": "P0018",
       "displayname": "Warren D.",
       "hcp": 12,
-      "tee": "Green"
-    },
-    {
-      "playerid": "P0007",
-      "displayname": "John B.",
-      "hcp": 15,
       "tee": "Green"
     }
   ]
