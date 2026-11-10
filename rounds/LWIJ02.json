@@ -1,20 +1,20 @@
 ﻿{
-  "roundid": "66UK02",
+  "roundid": "LWIJ02",
   "group": "D",
-  "date": "2026-11-03",
+  "date": "2026-11-10",
   "course": "The Neck",
   "players": [
     {
       "playerid": "P0049",
       "displayname": "John P.",
-      "hcp": 6,
+      "hcp": 7,
       "tee": "White"
     },
     {
-      "playerid": "P0072",
-      "displayname": "Tony Y.",
-      "hcp": 9,
-      "tee": "Why"
+      "playerid": "P0058",
+      "displayname": "Lee S.",
+      "hcp": 7,
+      "tee": "Bhy"
     },
     {
       "playerid": "P0004",
@@ -23,9 +23,9 @@
       "tee": "Bhy"
     },
     {
-      "playerid": "P0018",
-      "displayname": "Warren D.",
-      "hcp": 12,
+      "playerid": "P0064",
+      "displayname": "Mike W.",
+      "hcp": 15,
       "tee": "Green"
     }
   ]

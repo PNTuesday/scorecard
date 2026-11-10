@@ -1,9 +1,15 @@
 ﻿{
-  "roundid": "66SB6X",
-  "group": "C",
-  "date": "2026-11-03",
+  "roundid": "LWN0MC",
+  "group": "F",
+  "date": "2026-11-10",
   "course": "The Neck",
   "players": [
+    {
+      "playerid": "P0045",
+      "displayname": "Daniel M.",
+      "hcp": 6,
+      "tee": "White"
+    },
     {
       "playerid": "P0055",
       "displayname": "Jim S.",
@@ -11,16 +17,10 @@
       "tee": "Why"
     },
     {
-      "playerid": "P0016",
-      "displayname": "Jerry C.",
-      "hcp": 6,
+      "playerid": "P0009",
+      "displayname": "Bob B.",
+      "hcp": 10,
       "tee": "Bhy"
-    },
-    {
-      "playerid": "P0013",
-      "displayname": "Kevin C.",
-      "hcp": 11,
-      "tee": "Why"
     },
     {
       "playerid": "P0043",
