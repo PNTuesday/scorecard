@@ -1,7 +1,7 @@
 ﻿{
-  "roundid": "LWKRT7",
-  "group": "E",
-  "date": "2026-11-10",
+  "roundid": "1MD8FH",
+  "group": "G",
+  "date": "2026-11-17",
   "course": "The Neck",
   "players": [
     {
@@ -17,15 +17,15 @@
       "tee": "Bhy"
     },
     {
-      "playerid": "P0013",
-      "displayname": "Kevin C.",
-      "hcp": 11,
+      "playerid": "P0066",
+      "displayname": "Kevin W.",
+      "hcp": 12,
       "tee": "Why"
     },
     {
-      "playerid": "P0030",
-      "displayname": "Jonathan J.",
-      "hcp": 22,
+      "playerid": "P0014",
+      "displayname": "Brian C.",
+      "hcp": 18,
       "tee": "Why"
     }
   ]

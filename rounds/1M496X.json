@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "1M496X",
+  "group": "C",
+  "date": "2026-11-17",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0005",
+      "displayname": "Robert A.",
+      "hcp": 7,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0023",
+      "displayname": "Jan G.",
+      "hcp": 5,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0018",
+      "displayname": "Warren D.",
+      "hcp": 12,
+      "tee": "Green"
+    },
+    {
+      "playerid": "P0064",
+      "displayname": "Mike W.",
+      "hcp": 15,
+      "tee": "Green"
+    }
+  ]
+}
