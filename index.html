@@ -23,6 +23,43 @@
 
     <script src="app.js"></script>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc
+        } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCLcdqrVN2yeAhS1vuLn7WpievdG-Qusts",
+            authDomain: "pn-friendly-scores.firebaseapp.com",
+            projectId: "pn-friendly-scores",
+            storageBucket: "pn-friendly-scores.firebasestorage.app",
+            messagingSenderId: "211789937731",
+            appId: "1:211789937731:web:3da822764097393bb4a8f6"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const firebaseDb = getFirestore(firebaseApp);
+
+        window.testFirebaseSubmission = async function () {
+            const docRef = await addDoc(collection(firebaseDb, "scoreSubmissions"), {
+            RoundID: "TEST001",
+            PlayerID: "TESTPLAYER",
+            Player: "Test Player",
+            Group: "A",
+            Index: 10.3,
+            Tee: "TestTee",
+            H1: 4,
+            HCP: 10,
+            Status: "Test"
+        });
+
+        console.log("Firebase test successful. Document ID:", docRef.id);
+  };
+</script>
+
 </body>
 
 </html>
