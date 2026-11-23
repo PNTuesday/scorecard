@@ -1,19 +1,19 @@
 ﻿{
-  "roundid": "1M20DS",
+  "roundid": "HBPZDS",
   "group": "B",
-  "date": "2026-11-17",
+  "date": "2026-11-24",
   "course": "The Neck",
   "players": [
-    {
-      "playerid": "P0049",
-      "displayname": "John P.",
-      "hcp": 7,
-      "tee": "White"
-    },
     {
       "playerid": "P0002",
       "displayname": "Thomas A.",
       "hcp": 8,
+      "tee": "Why"
+    },
+    {
+      "playerid": "P0072",
+      "displayname": "Tony Y.",
+      "hcp": 9,
       "tee": "Why"
     },
     {
@@ -23,10 +23,10 @@
       "tee": "Bhy"
     },
     {
-      "playerid": "P0067",
-      "displayname": "Roger Y.",
-      "hcp": 15,
-      "tee": "Bhy"
+      "playerid": "P0014",
+      "displayname": "Brian C.",
+      "hcp": 18,
+      "tee": "Why"
     }
   ]
 }

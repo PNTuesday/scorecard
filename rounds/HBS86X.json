@@ -1,0 +1,32 @@
+﻿{
+  "roundid": "HBS86X",
+  "group": "C",
+  "date": "2026-11-24",
+  "course": "The Neck",
+  "players": [
+    {
+      "playerid": "P0073",
+      "displayname": "Allen C.",
+      "hcp": 8,
+      "tee": "White"
+    },
+    {
+      "playerid": "P0016",
+      "displayname": "Jerry C.",
+      "hcp": 7,
+      "tee": "Bhy"
+    },
+    {
+      "playerid": "P0051",
+      "displayname": "Clark R.",
+      "hcp": 12,
+      "tee": "Green"
+    },
+    {
+      "playerid": "P0067",
+      "displayname": "Roger Y.",
+      "hcp": 15,
+      "tee": "Bhy"
+    }
+  ]
+}
